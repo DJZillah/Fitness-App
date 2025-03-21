@@ -2,44 +2,48 @@
 namespace Fitify;
 include_once 'MoreDBUtil.php';
 //include_once 'FitifyRules.css';
+session_start();
 
-
+//affected table does not have user_id, will have to modify this later when logging in & shit is sorted
 $totalCal = 0;
-function validate($var) 
-{
-    return is_numeric($var); //simple input validation that checks if is number 
-}
+$message = '';
+$logDate = date('Y-m-d H:i:s');
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") { //patience, all this activates upon form submission (submit button.)
+$fields = ['breakfast', 'lunch', 'dinner', 'misc']; //array of all text input ids
 
-    $breakfastCal = $_POST["breakfast"];
-    $lunchCal = $_POST["lunch"];
-    $dinnerCal = $_POST["dinner"];
-    $miscCal = $_POST["misc"];
+$validInputs = array_fill_keys($fields, false); //associative array where each value is given a key of false
 
-    $validFast = false; //start of input validation
-    $validFast = false;
-    $validDinner = false;
-    $validMisc = false;
-
-    if (validate($breakfastCal))
-    {
-        $validFast = true;
-    }   
-    if (validate($lunchCal)) 
-    {
-        $validLunch = true;
-    }
-    if (validate($dinnerCal)) 
-    {
-        $validDinner = true;
-    }
-    if (validate($miscCal))
-    {
-        $validMisc = true;
+if ($_SERVER["REQUEST_METHOD"] == "POST") { //when submit button clicked
+    foreach ($fields as $field) { //iterate through $fields
+        if (isset($_POST[$field]) && is_numeric($_POST[$field])) {
+            $validInputs[$field] = true;
+            $_SESSION["valid" . ucfirst($field)] = $_POST[$field]; //store valid values in session, ucfirst stores them as differently by capitalizing the first letter
+            $message  = "";
+        } else {
+            $_SESSION["valid" . ucfirst($field)] = ""; //clear invalid values
+            $message = "Please ensure only numbers are entered.";
+        }
     }
 
-}
+    if ($validInputs) 
+    {
+        foreach ($fields as $field) { //fetch the associated entered values by the user and get the sum
+            if (isset($_POST[$field]) && is_numeric($_POST[$field])) {
+                $totalCal += $_POST[$field];
+            }
+        }
+
+        $sql = "INSERT INTO Simple_Cal_Log (TotalCal, LogDate)
+            VALUES ( $totalCal, '$logDate')";
+
+        if ($conn->query($sql) === TRUE) {
+            $message = "Yay";
+        } else {
+            echo "Error: " . $sql . "<br>" . $conn->error;
+        }
+        $conn->close();
+    }
+} //end of if submit button scope
 
 ?> 
 
@@ -50,20 +54,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") { //patience, all this activates upon 
         <p id="Logo"> fitify </p>
 
     </head>
-<h1> Your Calorie Counter </h1>
+<h1> Your Calories </h1>
+<p> <?= $message; ?> </p>
 
     
-        <form action="CalorieCounter.php?Submit=true" method="post"> 
-            <fieldset id = "Entry">
-                <legend> Today's Calories </legend>
-                <label> Breakfast: <input type="text" size="7" maxlength="5" name="breakfast" value="<?php echo isset($_SESSION['validBreak']) ? $_SESSION['validBreak'] : ''; ?>"/> <br/>
-                <label> Lunch: <input type="text" size="10" maxlength="5" name="lunch" value="<?php echo isset($_SESSION['validLunch']) ? $_SESSION['validLunch'] : ''; ?>"/> <br/>
-                
-                <label> Dinner: <input type="text" size="10" maxlength="5" name="dinner" value="<?php echo isset($_SESSION['validDinner']) ? $_SESSION['validDinner'] : ''; ?>">  <br/>
-                <label> Miscellaneous: <input type="text" size="3.2" maxlength="4" name="misc" value="<?php echo isset($_SESSION['validMisc']) ? $_SESSION['validMisc'] : ''; ?>"> </label> <br /> 
-            </fieldset>
-            <label><input type="submit" value="Add" name ="add"> </label>
-        </form>
+    <form action="CalorieCounter.php" method="post">
+        <fieldset id="Entry">
+            <legend>Today's Calories</legend>
+            <?php foreach ($fields as $field): ?>
+                <label> <?= ucfirst($field) ?>: 
+                    <input type="text" size="7" maxlength="5" name="<?= $field ?>" 
+                    value="<?= isset($_SESSION["valid" . ucfirst($field)]) ? $_SESSION["valid" . ucfirst($field)] : ''; ?>"/>
+                </label><br/>
+            <?php endforeach; ?>
+        </fieldset>
+    
+        <fieldset id="Entry"> 
+                <label><input type="submit" value="Add" name="add"></label>
+        </fieldset>
+    </form>
+
+
         <!--TODO -->
         <!-- Have a total for the day dynamically sum all Calorie Counts -->
         <!-- Make number validation -->
