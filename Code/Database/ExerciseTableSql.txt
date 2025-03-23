@@ -1,0 +1,29 @@
+CREATE TABLE `exercises` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `exercise_name` varchar(50) NOT NULL,
+  `muscle_group` varchar(50) NOT NULL,
+  `equipment_needed` varchar(50) DEFAULT 'Bodyweight',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+
+INSERT INTO exercises (exercise_name, muscle_group, equipment_needed) VALUES
+('Bench Press', 'Chest, Triceps, Shoulders', 'Barbell'),
+('Push-Ups', 'Chest, Triceps, Shoulders', 'Bodyweight'),
+('Pull-Ups', 'Back, Biceps', 'Pull-Up Bar'),
+('Bent-Over Rows', 'Back, Biceps', 'Barbell'),
+('Squats', 'Quads, Hamstrings, Glutes', 'Barbell'),
+('Deadlifts', 'Hamstrings, Glutes, Lower Back', 'Barbell'),
+('Lunges', 'Quads, Hamstrings, Glutes', 'Bodyweight or Dumbbells'),
+('Leg Press', 'Quads, Hamstrings, Glutes', 'Leg Press Machine'),
+('Overhead Press', 'Shoulders, Triceps', 'Barbell or Dumbbells'),
+('Lateral Raises', 'Shoulders', 'Dumbbells'),
+('Bicep Curls', 'Biceps', 'Dumbbells'),
+('Triceps Dips', 'Triceps', 'Parallel Bars or Bench'),
+('Hammer Curls', 'Biceps', 'Dumbbells'),
+('Planks', 'Core, Shoulders', 'Bodyweight'),
+('Hanging Leg Raises', 'Abs, Hip Flexors', 'Pull-Up Bar'),
+('Russian Twists', 'Obliques', 'Bodyweight or Medicine Ball'),
+('Burpees', 'Full Body, Conditioning', 'Bodyweight'),
+('Jump Rope', 'Cardio, Calves', 'Jump Rope'),
+('Kettlebell Swings', 'Glutes, Hamstrings, Core', 'Kettlebell'),
+('Standing Calf Raises', 'Calves', 'Bodyweight or Machine');
