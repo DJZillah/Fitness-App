@@ -1,0 +1,9 @@
+CREATE TABLE bmi_records (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    height FLOAT NOT NULL,
+    weight FLOAT NOT NULL,
+    bmi FLOAT NOT NULL,
+    category VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
