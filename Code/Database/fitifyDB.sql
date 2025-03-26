@@ -24,6 +24,31 @@ SET @@SESSION.SQL_LOG_BIN= 0;
 SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ '';
 
 --
+-- Table structure for table `Simple_Cal_Log`
+--
+
+DROP TABLE IF EXISTS `Simple_Cal_Log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `Simple_Cal_Log` (
+  `LogID` int NOT NULL AUTO_INCREMENT,
+  `TotalCal` int NOT NULL,
+  `LogDate` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`LogID`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `Simple_Cal_Log`
+--
+
+LOCK TABLES `Simple_Cal_Log` WRITE;
+/*!40000 ALTER TABLE `Simple_Cal_Log` DISABLE KEYS */;
+INSERT INTO `Simple_Cal_Log` VALUES (1,890,'2025-03-21 15:24:28'),(2,1074,'2025-03-21 15:46:10');
+/*!40000 ALTER TABLE `Simple_Cal_Log` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `activities`
 --
 
@@ -46,6 +71,35 @@ CREATE TABLE `activities` (
 LOCK TABLES `activities` WRITE;
 /*!40000 ALTER TABLE `activities` DISABLE KEYS */;
 /*!40000 ALTER TABLE `activities` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `bmi_records`
+--
+
+DROP TABLE IF EXISTS `bmi_records`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `bmi_records` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) DEFAULT NULL,
+  `height` float NOT NULL,
+  `weight` float NOT NULL,
+  `bmi` float NOT NULL,
+  `category` varchar(50) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `bmi_records`
+--
+
+LOCK TABLES `bmi_records` WRITE;
+/*!40000 ALTER TABLE `bmi_records` DISABLE KEYS */;
+INSERT INTO `bmi_records` VALUES (1,'goob',67,180,28.1889,'Overweight','2025-03-25 02:53:33'),(2,'goob',67,180,28.1889,'Overweight','2025-03-25 03:01:47');
+/*!40000 ALTER TABLE `bmi_records` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -77,6 +131,32 @@ CREATE TABLE `calories_log` (
 LOCK TABLES `calories_log` WRITE;
 /*!40000 ALTER TABLE `calories_log` DISABLE KEYS */;
 /*!40000 ALTER TABLE `calories_log` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `exercises`
+--
+
+DROP TABLE IF EXISTS `exercises`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `exercises` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `exercise_name` varchar(50) NOT NULL,
+  `muscle_group` varchar(50) NOT NULL,
+  `equipment_needed` varchar(50) DEFAULT 'Bodyweight',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `exercises`
+--
+
+LOCK TABLES `exercises` WRITE;
+/*!40000 ALTER TABLE `exercises` DISABLE KEYS */;
+INSERT INTO `exercises` VALUES (1,'Bench Press','Chest, Triceps, Shoulders','Barbell'),(2,'Push-Ups','Chest, Triceps, Shoulders','Bodyweight'),(3,'Pull-Ups','Back, Biceps','Pull-Up Bar'),(4,'Bent-Over Rows','Back, Biceps','Barbell'),(5,'Squats','Quads, Hamstrings, Glutes','Barbell'),(6,'Deadlifts','Hamstrings, Glutes, Lower Back','Barbell'),(7,'Lunges','Quads, Hamstrings, Glutes','Bodyweight or Dumbbells'),(8,'Leg Press','Quads, Hamstrings, Glutes','Leg Press Machine'),(9,'Overhead Press','Shoulders, Triceps','Barbell or Dumbbells'),(10,'Lateral Raises','Shoulders','Dumbbells'),(11,'Bicep Curls','Biceps','Dumbbells'),(12,'Triceps Dips','Triceps','Parallel Bars or Bench'),(13,'Hammer Curls','Biceps','Dumbbells'),(14,'Planks','Core, Shoulders','Bodyweight'),(15,'Hanging Leg Raises','Abs, Hip Flexors','Pull-Up Bar'),(16,'Russian Twists','Obliques','Bodyweight or Medicine Ball'),(17,'Burpees','Full Body, Conditioning','Bodyweight'),(18,'Jump Rope','Cardio, Calves','Jump Rope'),(19,'Kettlebell Swings','Glutes, Hamstrings, Core','Kettlebell'),(20,'Standing Calf Raises','Calves','Bodyweight or Machine');
+/*!40000 ALTER TABLE `exercises` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -120,7 +200,9 @@ DROP TABLE IF EXISTS `meals`;
 CREATE TABLE `meals` (
   `meal_id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
+  `day_of_week` varchar(10) NOT NULL,
   `meal_name` varchar(100) NOT NULL,
+  `meal_type` varchar(10) NOT NULL,
   `calories` decimal(6,2) NOT NULL,
   `protein` decimal(5,2) DEFAULT NULL,
   `carbs` decimal(5,2) DEFAULT NULL,
@@ -129,7 +211,7 @@ CREATE TABLE `meals` (
   PRIMARY KEY (`meal_id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `meals_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -192,7 +274,7 @@ CREATE TABLE `users` (
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -202,6 +284,31 @@ CREATE TABLE `users` (
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `weight_log`
+--
+
+DROP TABLE IF EXISTS `weight_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `weight_log` (
+  `log_id` int NOT NULL AUTO_INCREMENT,
+  `weight` decimal(5,2) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`log_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `weight_log`
+--
+
+LOCK TABLES `weight_log` WRITE;
+/*!40000 ALTER TABLE `weight_log` DISABLE KEYS */;
+INSERT INTO `weight_log` VALUES (2,150.00,'2025-03-25 22:07:53'),(5,180.00,'2025-03-25 22:31:07');
+/*!40000 ALTER TABLE `weight_log` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -217,11 +324,14 @@ CREATE TABLE `workout_logs` (
   `workout_type` varchar(50) NOT NULL,
   `duration_minutes` int NOT NULL,
   `calories_burned` decimal(6,2) NOT NULL,
+  `weight_used` decimal(10,2) DEFAULT NULL,
+  `reps` int DEFAULT NULL,
+  `sets` int DEFAULT NULL,
   `log_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`workout_id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `workout_logs_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -243,4 +353,4 @@ SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-04 16:44:28
+-- Dump completed on 2025-03-26 18:54:08
