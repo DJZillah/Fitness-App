@@ -1,10 +1,8 @@
-<?php
-$servername = "fitify-db.ctq460w22gbq.us-east-2.rds.amazonaws.com";
-$username = "root";  
-$password = "fitify123";  
-$database = "fitifyDB"; 
+<?php 
+namespace Fitify;
+require 'MoreDBUtil.php';
 
-$conn = new mysqli($servername, $username, $password, $database);
+$conn->select_db("fitifyDB");
 
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
@@ -12,8 +10,25 @@ if ($conn->connect_error) {
 
 $sql = "SELECT user_id, username, email, age, weight, height FROM users";
 $result = $conn->query($sql);
-?>
 
+// Handle user deletion
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['delete_user_id'])) {
+    $delete_user_id = $_POST['delete_user_id'];
+
+    // Prepare the DELETE statement
+    $stmt = $conn->prepare("DELETE FROM users WHERE user_id = ?");
+    $stmt->bind_param("i", $delete_user_id);
+
+    if ($stmt->execute()) {
+        echo "User deleted successfully.";
+    } else {
+        echo "Error deleting user: " . $conn->error;
+    }
+
+    $stmt->close();
+}
+?>
+<!-- This displays what's in the users table -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34,6 +49,7 @@ $result = $conn->query($sql);
                 <th>Age</th>
                 <th>Weight</th>
                 <th>Height</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -45,6 +61,16 @@ $result = $conn->query($sql);
                     <td><?= $row["age"] ?></td>
                     <td><?= $row["weight"] ?> lbs</td>
                     <td><?= $row["height"] ?> in</td>
+                    <td>
+                        <!-- Edit button links to edit.php with the user_id -->
+                        <a href="edit.php?user_id=<?= $row['user_id'] ?>" class="btn btn-warning btn-sm">Edit</a>
+                        
+                        <!-- Delete button triggers the form submission -->
+                        <form action="display.php" method="POST" style="display:inline;">
+                            <input type="hidden" name="delete_user_id" value="<?= $row['user_id'] ?>">
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </td>
                 </tr>
             <?php endwhile; ?>
         </tbody>
