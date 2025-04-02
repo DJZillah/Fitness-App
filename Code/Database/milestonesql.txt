@@ -6,3 +6,6 @@ CREATE TABLE milestones (
     achieved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
+ALTER TABLE milestones CHANGE exercise_name milestone_name VARCHAR(255) NOT NULL;
+ALTER TABLE milestones DROP COLUMN max_weight;
+changed some names around 
