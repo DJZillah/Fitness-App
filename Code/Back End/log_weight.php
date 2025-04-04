@@ -24,7 +24,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->execute();
             $stmt->close();
         } else {
-            //normal insert for new weight log
             $stmt = $conn->prepare("INSERT INTO weight_log (weight) VALUES (?)");
             $stmt->bind_param("d", $weight);
             $stmt->execute();
@@ -55,8 +54,18 @@ if (isset($_GET['edit'])) {
     }
 }
 
-//fetch all weight entries
+//fetch all weight entries for displaying in the table
 $result = $conn->query("SELECT * FROM weight_log ORDER BY created_at DESC");
+
+//fetch data for the chart in ascending order to show progress over time
+$chartData = $conn->query("SELECT weight, created_at FROM weight_log ORDER BY created_at ASC");
+$weights = [];
+$dates = [];
+
+while ($row = $chartData->fetch_assoc()) {
+    $weights[] = $row['weight'];         
+    $dates[] = $row['created_at'];       
+}
 
 ?>
 
@@ -64,43 +73,188 @@ $result = $conn->query("SELECT * FROM weight_log ORDER BY created_at DESC");
 <html>
 <head>
     <title>Weight Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!--chart.js library-->
+    <style>
+        * {
+            background-color: rgb(88, 88, 234);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: black;
+        }
+
+        h1 {
+            background-color: rgb(214, 231, 24);
+            border: 1px solid black;
+            border-width: 3px;
+            color: white;
+            margin: auto;
+            width: 40%;
+            text-align: center;
+            line-height: 70px;
+            font-weight: bold;
+            font-style: italic;
+        }
+
+        fieldset {
+            border: 2px solid black;
+            padding: 15px;
+            border-radius: 10px;
+            width: 40%;
+            margin: 20px auto;
+            background-color: white;
+        }
+
+        legend {
+            font-style: italic;
+            font-size: 1.2em;
+            background-color: rgb(214, 231, 24);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            display: block;
+            width: 90%;
+            margin: auto;
+            padding: 8px;
+            border: 1px solid black;
+            border-radius: 5px;
+            background-color: white;
+        }
+
+        input[type="submit"] {
+            background-color: black;
+            color: yellow;
+            font-size: 1.1em;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        input[type="submit"]:hover {
+            background-color: yellow;
+            color: black;
+            border: 2px solid black;
+        }
+
+        .cancel-link {
+            display: block;
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        table {
+            background-color: white;
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid black;
+            text-align: center;
+        }
+
+        canvas {
+            display: block;
+            margin: 20px auto;
+            background-color: white;
+            border-radius: 10px;
+            padding: 10px;
+        }
+    </style>
 </head>
 <body>
 
-<h2><?= $editData ? "Edit Weigh-In" : "Log New Weigh-In" ?></h2>
+<!--form title dynamically switches between edit and add modes -->
+<h1><?= $editData ? "Edit Weigh-In" : "Log New Weigh-In" ?></h1>
 
+<!--form for submitting weight-->
 <form method="POST">
-    <input type="number" step="0.1" name="weight" placeholder="Weight (lbs)" required
-           value="<?= $editData ? $editData['weight'] : '' ?>">
-    <?php if ($editData): ?>
-        <input type="hidden" name="edit_id" value="<?= $editData['log_id'] ?>">
-        <input type="submit" value="Update Weight">
-        <a href="<?= $_SERVER['PHP_SELF'] ?>">Cancel</a>
-    <?php else: ?>
-        <input type="submit" value="Log Weight">
-    <?php endif; ?>
+    <fieldset>
+        <legend><?= $editData ? "Edit Entry" : "New Entry" ?></legend>
+        <label for="weight">Weight (lbs):</label>
+        <input type="number" step="0.1" name="weight" required
+               value="<?= $editData ? $editData['weight'] : '' ?>">
+        <?php if ($editData): ?>
+            <input type="hidden" name="edit_id" value="<?= $editData['log_id'] ?>">
+            <input type="submit" value="Update Weight">
+            <a class="cancel-link" href="<?= $_SERVER['PHP_SELF'] ?>">Cancel</a>
+        <?php else: ?>
+            <input type="submit" value="Log Weight">
+        <?php endif; ?>
+    </fieldset>
 </form>
 
-<h2>Weight History</h2>
-
-<table cellpadding="5">
+<!--weight history table-->
+<h2 style="text-align: center;">Weight History</h2>
+<table>
     <tr>
         <th>Log ID</th>
         <th>Weight</th>
         <th>Date</th>
+        <th>Actions</th>
     </tr>
     <?php while ($row = $result->fetch_assoc()): ?>
-    <tr>
-        <td><?= $row['log_id'] ?></td>
-        <td><?= $row['weight'] ?> lbs</td>
-        <td><?= $row['created_at'] ?></td>
-        <td>
-            <a href="?edit=<?= $row['log_id'] ?>">Edit</a> |
-            <a href="?delete=<?= $row['log_id'] ?>" onclick="return confirm('Delete this entry?')">Delete</a>
-        </td>
-    </tr>
+        <tr>
+            <td><?= $row['log_id'] ?></td>
+            <td><?= $row['weight'] ?> lbs</td>
+            <td><?= $row['created_at'] ?></td>
+            <td>
+                <!--edit or delete entries-->
+                <a href="?edit=<?= $row['log_id'] ?>">Edit</a> |
+                <a href="?delete=<?= $row['log_id'] ?>" onclick="return confirm('Delete this entry?')">Delete</a>
+            </td>
+        </tr>
     <?php endwhile; ?>
 </table>
+
+<!--chart display for weight progression-->
+<h2 style="text-align: center;">Weight Progress Chart</h2>
+<canvas id="weightChart" width="600" height="300"></canvas>
+
+<script>
+    //chart.js
+    const ctx = document.getElementById('weightChart').getContext('2d');
+    const weightChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: <?= json_encode($dates) ?>, //x axis: dates
+            datasets: [{
+                label: 'Weight (lbs)',
+                data: <?= json_encode($weights) ?>, //y axis: weights
+                borderColor: 'red',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.5
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: false //start y axis from lowest value
+                }
+            }
+        }
+    });
+</script>
 
 </body>
 </html>
