@@ -1,7 +1,6 @@
 <?php
 namespace Fitify;
 include_once 'MoreDBUtil.php';
-//include_once 'FitifyRules.css';
 session_start();
 
 //affected table does not have user_id, will have to modify this later when logging in & shit is sorted
@@ -33,8 +32,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") { //when submit button clicked
             }
         }
 
-        $sql = "INSERT INTO Simple_Cal_Log (TotalCal, LogDate)
-            VALUES ( $totalCal, '$logDate')";
+        //$_SESSION['user'] 
+        //$_SESSION['user_id']
+
+        $sql = "INSERT INTO Simple_Cal_Log (TotalCal, LogDate, user_id) 
+        VALUES ($totalCal, '$logDate', " . $_SESSION['user_id'] . ")";
+         //Simple_Cal_Log has auto-increment primary key "LogID"
 
         if ($conn->query($sql) === TRUE) {
             $message = "Yay";
@@ -77,9 +80,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") { //when submit button clicked
 
         <!--TODO -->
         <!-- Have a total for the day dynamically sum all Calorie Counts -->
-        <!-- Make number validation -->
-        <!-- Keep a current date and time, and figure out how/if that would interact with the database --> 
         <!-- Make logo a link to home page that doesn't exist yet -->
+        <!-- Combine this with BMI calculator-->
 
 
 </html>
