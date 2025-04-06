@@ -1,9 +1,10 @@
 <?php
+namespace Fitify;
 session_start();
 require 'MoreDBUtil.php'; 
 
 // Select the correct database
-$conn->select_db("fitifyDB");
+$conn->select_db("fitifyDB"); 
 
 $error = "";
 
@@ -20,10 +21,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $stmt->bind_result($user_id, $username, $hashed_password);
         $stmt->fetch();
 
-        if (password_verify($password, $hashed_password)) {
+        if (password_verify($password, $hashed_password)) { 
             $_SESSION['user'] = $username;
-            $_SESSION['user_id'] = $user_id;
-            header("Location: dashboard.php");
+            $_SESSION['user_id'] = $user_id; //get userID from session and check if its in database later
+            header("Location: FitHomepage.php");
             exit();
         } else {
             $error = "Invalid email or password!";

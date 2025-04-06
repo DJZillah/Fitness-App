@@ -1,4 +1,5 @@
 <?php
+namespace Fitify;
 session_start();
 require 'MoreDBUtil.php'; 
 $conn->select_db("fitifyDB");
@@ -28,7 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         if ($stmt->execute()) {
             $_SESSION['user'] = $username;
             $_SESSION['user_id'] = $stmt->insert_id;
-            header("Location: dashboard.php");
+            header("Location: FitHomepage.php");
             exit();
         } else {
             $error = "Error registering account!";
