@@ -1,4 +1,5 @@
 <?php
+session_start(); 
 
 //connect to the database
 $servername = "fitify-db.ctq460w22gbq.us-east-2.rds.amazonaws.com";
@@ -11,27 +12,32 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+$userId = $_SESSION['user_id'];
+$message = "";
+
 //handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $weight = $_POST["weight"];
 
-    if (is_numeric($weight)) {
+    if (is_numeric($weight) && $weight > 0) {
         //if editing an existing entry
         if (isset($_POST["edit_id"])) {
             $editId = intval($_POST["edit_id"]);
-            $stmt = $conn->prepare("UPDATE weight_log SET weight = ? WHERE log_id = ?");
-            $stmt->bind_param("di", $weight, $editId);
+            $stmt = $conn->prepare("UPDATE weight_log SET weight = ? WHERE log_id = ? AND user_id = ?");
+            $stmt->bind_param("dii", $weight, $editId, $userId);
             $stmt->execute();
             $stmt->close();
+            $message = "Weight updated successfully.";
         } else {
-            $stmt = $conn->prepare("INSERT INTO weight_log (weight) VALUES (?)");
-            $stmt->bind_param("d", $weight);
+            $stmt = $conn->prepare("INSERT INTO weight_log (weight, user_id) VALUES (?, ?)");
+            $stmt->bind_param("di", $weight, $userId);
             $stmt->execute();
             $stmt->close();
+            $message = "New weight logged successfully.";
         }
 
         //redirect to avoid form resubmission on page refresh
-        header("Location: " . $_SERVER['PHP_SELF']);
+        header("Location: " . $_SERVER['PHP_SELF'] . "?msg=" . urlencode($message));
         exit();
     }
 }
@@ -39,41 +45,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 //handle delete
 if (isset($_GET['delete'])) {
     $deleteId = intval($_GET['delete']);
-    $conn->query("DELETE FROM weight_log WHERE log_id = $deleteId");
-    header("Location: " . $_SERVER['PHP_SELF']);
-    exit();
+    if ($deleteId > 0) {
+        $conn->query("DELETE FROM weight_log WHERE log_id = $deleteId AND user_id = $userId");
+        $message = "Weight entry deleted successfully.";
+        header("Location: " . $_SERVER['PHP_SELF'] . "?msg=" . urlencode($message));
+        exit();
+    }
+}
+
+if (isset($_GET['msg'])) {
+    $message = htmlspecialchars($_GET['msg']);
 }
 
 //fetch data to edit if requested
 $editData = null;
 if (isset($_GET['edit'])) {
     $editId = intval($_GET['edit']);
-    $editResult = $conn->query("SELECT * FROM weight_log WHERE log_id = $editId");
+    $editResult = $conn->query("SELECT * FROM weight_log WHERE log_id = $editId AND user_id = $userId");
     if ($editResult->num_rows > 0) {
         $editData = $editResult->fetch_assoc();
     }
 }
 
-//fetch all weight entries for displaying in the table
-$result = $conn->query("SELECT * FROM weight_log ORDER BY created_at DESC");
+$result = $conn->query("SELECT * FROM weight_log WHERE user_id = $userId ORDER BY created_at DESC");
 
 //fetch data for the chart in ascending order to show progress over time
-$chartData = $conn->query("SELECT weight, created_at FROM weight_log ORDER BY created_at ASC");
+$chartData = $conn->query("SELECT weight, created_at FROM weight_log WHERE user_id = $userId ORDER BY created_at ASC");
 $weights = [];
 $dates = [];
 
 while ($row = $chartData->fetch_assoc()) {
-    $weights[] = $row['weight'];         
-    $dates[] = $row['created_at'];       
+    $weights[] = $row['weight'];
+    $dates[] = $row['created_at'];
 }
-
 ?>
 
 <!DOCTYPE html>
 <html>
 <head>
     <title>Weight Tracker</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!--chart.js library-->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
     <style>
         * {
             background-color: rgb(88, 88, 234);
@@ -118,7 +129,6 @@ while ($row = $chartData->fetch_assoc()) {
             margin-top: 10px;
         }
 
-        input[type="text"],
         input[type="number"] {
             display: block;
             width: 90%;
@@ -157,6 +167,12 @@ while ($row = $chartData->fetch_assoc()) {
             font-weight: bold;
         }
 
+        .message {
+            text-align: center;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
         table {
             background-color: white;
             margin-top: 20px;
@@ -183,8 +199,11 @@ while ($row = $chartData->fetch_assoc()) {
 </head>
 <body>
 
-<!--form title dynamically switches between edit and add modes -->
 <h1><?= $editData ? "Edit Weigh-In" : "Log New Weigh-In" ?></h1>
+
+<?php if (!empty($message)): ?>
+    <div class="message"><?= $message ?></div>
+<?php endif; ?>
 
 <!--form for submitting weight-->
 <form method="POST">
@@ -249,7 +268,7 @@ while ($row = $chartData->fetch_assoc()) {
         options: {
             scales: {
                 y: {
-                    beginAtZero: false //start y axis from lowest value
+                    beginAtZero: false 
                 }
             }
         }
