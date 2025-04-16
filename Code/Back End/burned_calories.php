@@ -1,4 +1,4 @@
-<?php
+<?php 
 session_start();
 
 //connect to the database
@@ -15,7 +15,7 @@ if ($conn->connect_error) {
 $userId = $_SESSION['user_id'];
 $message = "";
 
-//used to calculate calories burned based on weight
+//MET values for different activities
 $activityMETs = [
     "Running" => 9.8,
     "Walking" => 3.5,
@@ -25,9 +25,9 @@ $activityMETs = [
     "Weightlifting" => 6.0
 ];
 
-//get user weight
-$userQuery = $conn->query("SELECT weight FROM users WHERE user_id = $userId");
+//get users weight in pounds
 $userWeight = 0;
+$userQuery = $conn->query("SELECT weight FROM users WHERE user_id = $userId");
 if ($userQuery && $userQuery->num_rows > 0) {
     $userData = $userQuery->fetch_assoc();
     $userWeight = floatval($userData['weight']);
@@ -37,9 +37,13 @@ if ($userQuery && $userQuery->num_rows > 0) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $activity = isset($_POST["activity_name"]) ? trim($_POST["activity_name"]) : "";
     $duration = isset($_POST["duration_minutes"]) ? intval($_POST["duration_minutes"]) : 0;
-
     $met = $activityMETs[$activity] ?? 0;
-    $calories = ($met * 3.5 * $userWeight / 200) * $duration;
+    
+    //convert pounds to kilograms
+    $weightKg = $userWeight * 0.453592;
+
+    //calculate calories using MET formula
+    $calories = round(($met * 3.5 * $weightKg) / 200 * $duration);
 
     if ($duration > 0 && !empty($activity) && $met > 0 && $userWeight > 0) {
         if (isset($_POST["edit_id"])) {
@@ -241,7 +245,7 @@ $result = $conn->query("SELECT * FROM burned_calories_log WHERE user_id = $userI
             <td><?= $row['log_id'] ?></td>
             <td><?= $row['activity_name'] ?></td>
             <td><?= $row['duration_minutes'] ?? '-' ?></td>
-            <td><?= round($row['calories_burned'], 2) ?></td>
+            <td><?= $row['calories_burned'] ?></td>
             <td><?= $row['log_date'] ?></td>
             <td>
                 <a href="?edit=<?= $row['log_id'] ?>">Edit</a> |
