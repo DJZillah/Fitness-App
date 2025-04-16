@@ -71,6 +71,7 @@ $exercise_list = $conn->query("SELECT id, exercise_name FROM exercises");
         </form>
 
         <br>
+        <a href="FitHomepage.php" class="back-button">← Back to Dashboard</a>
         <a href="view_milestones.php">View Your Milestones</a>
     </div>
 </body>
