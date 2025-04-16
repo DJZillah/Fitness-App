@@ -59,6 +59,7 @@ $result = $stmt->get_result();
         </div>
 
         <a href="add_milestone.php">Add New Milestone</a>
+        <a href="FitHomepage.php" class="back-button">← Back to Dashboard</a>
     </div>
 </body>
 </html>
