@@ -25,9 +25,15 @@ $activityMETs = [
     "Weightlifting" => 6.0
 ];
 
-//get users weight in pounds
+//get users weight
 $userWeight = 0;
-$userQuery = $conn->query("SELECT weight FROM users WHERE user_id = $userId");
+$userQuery = $conn->query("
+    SELECT weight 
+    FROM weight_log 
+    WHERE user_id = $userId 
+    ORDER BY created_at DESC 
+    LIMIT 1
+");
 if ($userQuery && $userQuery->num_rows > 0) {
     $userData = $userQuery->fetch_assoc();
     $userWeight = floatval($userData['weight']);
