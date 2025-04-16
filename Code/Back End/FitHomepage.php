@@ -7,6 +7,10 @@ session_start();
 print_r($_SESSION);
 echo '</pre>'; */
 
+if (empty($_SESSION)) //if somehow not logged in
+{
+    Header("Location: login.php");
+}
 $weeklyCalSql = "SELECT TotalCal FROM Simple_Cal_Log WHERE LogDate 
 >= DATE_SUB(NOW(), INTERVAL 7 DAY) AND user_id = " . $_SESSION['user_id']; //perhaps make error handling to check if username in session has associated user_id in database
 $weeklyCalDisplay; //when user-specific stuff is sorted, sort by user_id
@@ -53,9 +57,9 @@ else
 //end current weight logic
 
 $currentBMISql = "SELECT bmi FROM bmi_records 
-WHERE created_at <= NOW() 
+WHERE created_at <= NOW() AND name = '" . $_SESSION['user'] . "' 
 ORDER BY created_at DESC 
-LIMIT 1"; //current BMI, needs to be reconfigured when user stuff is figured out
+LIMIT 1";
 
 $result2 = $conn->query($currentBMISql);
 $currentBMIDisplay;
@@ -84,35 +88,59 @@ else
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
     border-style: groove;
     text-align: center;
-    padding: 6px;    
+    padding: 2%;    
     border: 1px solid black;
     margin: 0;
     border-width: 5px;
-    background-color: rgb(0, 217, 255);
+    background-image: url('DarkSwirl.png');
+    background-size: cover;        /* Scales image to cover entire fieldset */
+    background-repeat: no-repeat;  /* Prevents tiling */
+    background-position: center;
+    background-color: transparent;
 }
 .TopofPage a {
-    background-color:rgb(214, 231, 24);
+    background-color:transparent;
+    background-image:none;
+    color: white;
 }
 #Calories {
-    line-height: 54px;
-    font-size: 18px;
+    line-height: 206%;
+    font-size: 132%;
 }
 .Hello {
-
+    background-image:none;
+    background-color:transparent;
+}
+.Dash {
+    background-image:url('DarkBG.jpg');
+    border: .5px solid rgb(92, 91, 91);
+    width: 50%;
+    margin: 8% auto;
+    border-width: 1.6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;    
+}
+.Dash p {
+    color: rgb(201, 197, 7);
+    text-shadow: .7px .7px .7px rgb(92, 91, 91);
+    font-family: 'Orbitron', sans-serif;
+    background-image:none;
 }
 </style>
 
 <head>
-    <link href="FitifyRules.css" type="text/css" rel="stylesheet"/>
+    <link href="FitifyRules2.css" type="text/css" rel="stylesheet"/>
 
     <div class="TopofPage">
         <h1 id="Logo"> fitify </h1>
     
         <h1 id="Calories"> <a href="CalorieCounter.php"> Health & Nutrition </a> </h1> <!-- Perhaps combine HMI & Calorie Counter pages into one later. -->
-        <h1 id="Workouts"> <a href="MidTermProduct2.html"> Workouts </a></h1>
+        <h1 id="Workouts"> <a href="WorkoutTracker.php"> Workouts </a></h1>
         <h1 id="Milestones"> <a href="View_milestones.php"> Milestones </a></h1>
         <h1 id="Guidance"> <a href="MidTermDiscountClub.html"> Guidance</a> </h1>
-        <h1 id="Placeholder"> <a href="MidTermFuturePage.html">Placeholder</a> </h1>
+        <h1 id="Achievements"> <a href="Accolades.php">Accolades</a> </h1>
 
     </div>
 
@@ -120,10 +148,9 @@ else
     if ($_SERVER["REQUEST_METHOD"] === "POST") //if logout is clicked
     {
         session_destroy();
-        header("Location: login.php");
+        header("Location: login.php"); //back to login page
     }
-        
-    ?>
+    ?> 
 
     <div class = "Hello"> 
         <h2> Hello, <?= $_SESSION['user']; ?> </h2>
@@ -135,11 +162,15 @@ else
 </head>
 
 <body>
-    <!-- Put username here when that is a thing later -->
-    <p> This week's calorie intake: <?= $weeklyCalDisplay ?></p>
-    <p> Your Current weight is: <?= $currentWeightDisplay ?></p>
-    <p> Your BMI is currently: <?= $currentBMIDisplay?></p>
-
-
-
+    <div class = "Dash">
+        <p> This week's calorie intake: <?= $weeklyCalDisplay ?>cal</p> <br/>
+        <p> Your Current weight is: <?= $currentWeightDisplay ?>lbs</p> <br/>
+        <p> Your BMI is currently <?= $currentBMIDisplay?></p> <br/>
+        <p> Your last logged workout was on <i> date </i> and you burned <i> amount </i> calories </p> <br/>
+        <p> Your latest achievement was <i>placeholder</i> </p> <br/>
+    </div>
 </body>
+<!--TODO-->
+<!--Make an alert system; like reminding the user to enter their calories for the day. -->
+<!--Make an achievements/badges system, maybe work that in with the milestone feature that doesnt exist yet.-->
+<!--get this linked with the weight tracker bs and update that table. -->

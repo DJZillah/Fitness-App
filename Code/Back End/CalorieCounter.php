@@ -108,6 +108,7 @@ if (isset($_POST['add']))
         <p id="Logo"> <a href="FitHomepage.php"> fitify </a></p>
 
         <style>
+
         #Logo { /*Logo is just text */
         width: auto; 
         height: auto; 
@@ -120,13 +121,20 @@ if (isset($_POST['add']))
         text-shadow: 1px 1px 2px black;
         font-weight: bold;
         font-style: italic;
+        color: white;
+        background-image: none;
     }
     a {
-        color:white;
+        color: white;
         text-decoration:none;
+        background: none !important;
     } 
+    body, head {
+        background: none !important;
+    }
         </style>
     </head>
+    <body>
 <h1> Your Calories </h1>
 <p> <?= $message; ?> </p>
 
@@ -159,4 +167,5 @@ if (isset($_POST['add']))
 
         <input type="submit" name="calc" value="Calculate BMI">
     </form>
+    </body>
 </html>
