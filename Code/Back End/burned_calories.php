@@ -15,22 +15,43 @@ if ($conn->connect_error) {
 $userId = $_SESSION['user_id'];
 $message = "";
 
+//used to calculate calories burned based on weight
+$activityMETs = [
+    "Running" => 9.8,
+    "Walking" => 3.5,
+    "Cycling" => 7.5,
+    "Swimming" => 8.3,
+    "Yoga" => 2.5,
+    "Weightlifting" => 6.0
+];
+
+//get user weight
+$userQuery = $conn->query("SELECT weight FROM users WHERE user_id = $userId");
+$userWeight = 0;
+if ($userQuery && $userQuery->num_rows > 0) {
+    $userData = $userQuery->fetch_assoc();
+    $userWeight = floatval($userData['weight']);
+}
+
 //handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $calories = $_POST["calories_burned"];
     $activity = isset($_POST["activity_name"]) ? trim($_POST["activity_name"]) : "";
+    $duration = isset($_POST["duration_minutes"]) ? intval($_POST["duration_minutes"]) : 0;
 
-    if (is_numeric($calories) && $calories > 0 && !empty($activity)) {
+    $met = $activityMETs[$activity] ?? 0;
+    $calories = ($met * 3.5 * $userWeight / 200) * $duration;
+
+    if ($duration > 0 && !empty($activity) && $met > 0 && $userWeight > 0) {
         if (isset($_POST["edit_id"])) {
             $editId = intval($_POST["edit_id"]);
-            $stmt = $conn->prepare("UPDATE burned_calories_log SET calories_burned = ?, activity_name = ? WHERE log_id = ? AND user_id = ?");
-            $stmt->bind_param("dsii", $calories, $activity, $editId, $userId);
+            $stmt = $conn->prepare("UPDATE burned_calories_log SET calories_burned = ?, activity_name = ?, duration_minutes = ? WHERE log_id = ? AND user_id = ?");
+            $stmt->bind_param("dsiii", $calories, $activity, $duration, $editId, $userId);
             $stmt->execute();
             $stmt->close();
             $message = "Burned calories updated successfully.";
         } else {
-            $stmt = $conn->prepare("INSERT INTO burned_calories_log (user_id, calories_burned, activity_name) VALUES (?, ?, ?)");
-            $stmt->bind_param("ids", $userId, $calories, $activity);
+            $stmt = $conn->prepare("INSERT INTO burned_calories_log (user_id, calories_burned, activity_name, duration_minutes) VALUES (?, ?, ?, ?)");
+            $stmt->bind_param("idsi", $userId, $calories, $activity, $duration);
             $stmt->execute();
             $stmt->close();
             $message = "New burned calories logged successfully.";
@@ -39,7 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header("Location: " . $_SERVER['PHP_SELF'] . "?msg=" . urlencode($message));
         exit();
     } else {
-        $message = "Please enter valid calories and activity.";
+        $message = "Please enter a valid activity, duration, and ensure your weight is recorded.";
     }
 }
 
@@ -81,7 +102,6 @@ $result = $conn->query("SELECT * FROM burned_calories_log WHERE user_id = $userI
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: black;
         }
-
         h1 {
             background-color: rgb(214, 231, 24);
             border: 1px solid black;
@@ -94,7 +114,6 @@ $result = $conn->query("SELECT * FROM burned_calories_log WHERE user_id = $userI
             font-weight: bold;
             font-style: italic;
         }
-
         fieldset {
             border: 2px solid black;
             padding: 15px;
@@ -103,7 +122,6 @@ $result = $conn->query("SELECT * FROM burned_calories_log WHERE user_id = $userI
             margin: 20px auto;
             background-color: white;
         }
-
         legend {
             font-style: italic;
             font-size: 1.2em;
@@ -112,15 +130,13 @@ $result = $conn->query("SELECT * FROM burned_calories_log WHERE user_id = $userI
             padding: 5px 10px;
             border-radius: 5px;
         }
-
         label {
             display: block;
             font-weight: bold;
             margin-top: 10px;
         }
-
         input[type="number"],
-        input[type="text"] {
+        select {
             display: block;
             width: 90%;
             margin: auto;
@@ -129,7 +145,6 @@ $result = $conn->query("SELECT * FROM burned_calories_log WHERE user_id = $userI
             border-radius: 5px;
             background-color: white;
         }
-
         input[type="submit"] {
             background-color: black;
             color: yellow;
@@ -144,26 +159,22 @@ $result = $conn->query("SELECT * FROM burned_calories_log WHERE user_id = $userI
             margin-left: auto;
             margin-right: auto;
         }
-
         input[type="submit"]:hover {
             background-color: yellow;
             color: black;
             border: 2px solid black;
         }
-
         .cancel-link {
             display: block;
             text-align: center;
             margin-top: 10px;
             font-weight: bold;
         }
-
         .message {
             text-align: center;
             font-weight: bold;
             margin-top: 15px;
         }
-
         table {
             background-color: white;
             margin-top: 20px;
@@ -172,7 +183,6 @@ $result = $conn->query("SELECT * FROM burned_calories_log WHERE user_id = $userI
             margin-left: auto;
             margin-right: auto;
         }
-
         th, td {
             padding: 10px;
             border: 1px solid black;
@@ -191,13 +201,20 @@ $result = $conn->query("SELECT * FROM burned_calories_log WHERE user_id = $userI
 <form method="POST">
     <fieldset>
         <legend><?= $editData ? "Edit Entry" : "New Entry" ?></legend>
-        <label for="calories_burned">Calories Burned:</label>
-        <input type="number" name="calories_burned" required
-               value="<?= $editData ? $editData['calories_burned'] : '' ?>">
 
         <label for="activity_name">Activity Type:</label>
-        <input type="text" name="activity_name" required
-               value="<?= $editData ? $editData['activity_name'] : '' ?>">
+        <select name="activity_name" required>
+            <option value="">--Select Activity--</option>
+            <?php foreach ($activityMETs as $activityName => $rate): ?>
+                <option value="<?= $activityName ?>" <?= ($editData && $editData['activity_name'] === $activityName) ? "selected" : "" ?>>
+                    <?= $activityName ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+
+        <label for="duration_minutes">Duration (minutes):</label>
+        <input type="number" name="duration_minutes" required
+               value="<?= $editData ? $editData['duration_minutes'] : '' ?>">
 
         <?php if ($editData): ?>
             <input type="hidden" name="edit_id" value="<?= $editData['log_id'] ?>">
@@ -213,16 +230,18 @@ $result = $conn->query("SELECT * FROM burned_calories_log WHERE user_id = $userI
 <table>
     <tr>
         <th>Log ID</th>
-        <th>Calories Burned</th>
         <th>Activity</th>
+        <th>Duration (min)</th>
+        <th>Calories Burned</th>
         <th>Date</th>
         <th>Actions</th>
     </tr>
     <?php while ($row = $result->fetch_assoc()): ?>
         <tr>
             <td><?= $row['log_id'] ?></td>
-            <td><?= $row['calories_burned'] ?></td>
             <td><?= $row['activity_name'] ?></td>
+            <td><?= $row['duration_minutes'] ?? '-' ?></td>
+            <td><?= round($row['calories_burned'], 2) ?></td>
             <td><?= $row['log_date'] ?></td>
             <td>
                 <a href="?edit=<?= $row['log_id'] ?>">Edit</a> |
