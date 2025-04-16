@@ -9,3 +9,9 @@ CREATE TABLE milestones (
 ALTER TABLE milestones CHANGE exercise_name milestone_name VARCHAR(255) NOT NULL;
 ALTER TABLE milestones DROP COLUMN max_weight;
 changed some names around 
+ALTER TABLE milestones
+    ADD COLUMN exercise_id INT,
+    ADD COLUMN max_weight INT,
+    ADD COLUMN reps INT,
+    ADD FOREIGN KEY (exercise_id) REFERENCES exercises(id);
+more changes to add some functionality
