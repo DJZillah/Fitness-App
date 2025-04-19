@@ -91,130 +91,253 @@ $exercise_result = $conn->query($exercise_sql);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Workout Tracker</title>
-    <link rel="stylesheet" href="FitifyRules.css">
+    <link rel="stylesheet" href="FitifyRules0.css">
 </head>
 <body>
 
-<!-- Back to Homepage Button -->
-<a href="dashboard.php">
-    <button>Back to Homepage</button>
-</a>
+<!-- Navigation Bar -->
+<header class="TopofPage">
+    <h1 id="Logo">Fitify</h1>
+    <nav>
+        <a href="FitHomepage.php">Home</a>
+        <a href="#">About</a>
+        <a href="#">Contact</a>
+    </nav>
+</header>
 
-<h1>Workout Tracker</h1>
-<h2>Add New Workout</h2>
-<form method="POST" action="">
-    <label for="workout_type">Exercise:</label>
-    <select name="workout_type" required>
-        <?php while ($row = $exercise_result->fetch_assoc()) { ?>
-            <option value="<?= htmlspecialchars($row['exercise_name']) ?>">
-                <?= htmlspecialchars($row['exercise_name']) ?>
-            </option>
-        <?php } ?>
-    </select><br>
-    <label for="duration_minutes">Duration (minutes):</label>
-    <input type="number" name="duration_minutes" required><br>
-    <label for="calories_burned">Calories Burned:</label>
-    <input type="number" name="calories_burned" required><br>
-    <label for="weight_used">Weight Used:</label>
-    <input type="number" name="weight_used" required><br>
-    <label for="sets">Sets:</label>
-    <input type="number" name="sets" required><br>
-    <label for="reps">Reps:</label>
-    <input type="number" name="reps" required><br>
-    <button type="submit" name="create">Add Workout</button>
-</form>
+<!-- Page Content -->
+<div class="container">
 
-<h2>Your Workout Logs</h2>
-<table>
-    <tr>
-        <th>Date</th>
-        <th>Workout Type</th>
-        <th>Duration</th>
-        <th>Calories Burned</th>
-        <th>Weight Used</th>
-        <th>Sets</th>
-        <th>Reps</th>
-        <th>Actions</th>
-    </tr>
-    <?php while ($row = $result->fetch_assoc()) { ?>
-        <tr>
-            <td><?= htmlspecialchars($row['log_date']) ?></td>
-            <td><?= htmlspecialchars($row['workout_type']) ?></td>
-            <td><?= intval($row['duration_minutes']) ?></td>
-            <td><?= intval($row['calories_burned']) ?></td>
-            <td><?= intval($row['weight_used']) ?></td>
-            <td><?= intval($row['sets']) ?></td>
-            <td><?= intval($row['reps']) ?></td>
-            <td>
-                <form method="POST" action="">
-                    <input type="hidden" name="workout_id" value="<?= intval($row['workout_id']) ?>">
-                    <button type="submit" name="delete">Delete</button>
-                </form>
-            </td>
-        </tr>
-    <?php } ?>
-</table>
+    <!-- Page Heading -->
+    <h1>Workout Tracker</h1>
+
+    <!-- Workout Form -->
+    <fieldset>
+        <legend>Add New Workout</legend>
+        <form method="POST" action="">
+            <label for="workout_type">Exercise:</label>
+            <select name="workout_type" required>
+                <?php while ($row = $exercise_result->fetch_assoc()) { ?>
+                    <option value="<?= htmlspecialchars($row['exercise_name']) ?>">
+                        <?= htmlspecialchars($row['exercise_name']) ?>
+                    </option>
+                <?php } ?>
+            </select>
+
+            <label for="duration_minutes">Duration (minutes):</label>
+            <input type="number" name="duration_minutes" required>
+
+            <label for="calories_burned">Calories Burned:</label>
+            <input type="number" name="calories_burned" required>
+
+            <label for="weight_used">Weight Used:</label>
+            <input type="number" name="weight_used" required>
+
+            <label for="sets">Sets:</label>
+            <input type="number" name="sets" required>
+
+            <label for="reps">Reps:</label>
+            <input type="number" name="reps" required>
+
+            <button type="submit" name="create">Add Workout</button>
+        </form>
+    </fieldset>
+
+    <!-- Workout Table -->
+    <h2>Your Workout Logs</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Workout Type</th>
+                <th>Duration</th>
+                <th>Calories</th>
+                <th>Weight</th>
+                <th>Sets</th>
+                <th>Reps</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php while ($row = $result->fetch_assoc()) { ?>
+                <tr>
+                    <td><?= htmlspecialchars($row['log_date']) ?></td>
+                    <td><?= htmlspecialchars($row['workout_type']) ?></td>
+                    <td><?= intval($row['duration_minutes']) ?></td>
+                    <td><?= intval($row['calories_burned']) ?></td>
+                    <td><?= intval($row['weight_used']) ?></td>
+                    <td><?= intval($row['sets']) ?></td>
+                    <td><?= intval($row['reps']) ?></td>
+                    <td>
+                        <form method="POST" action="">
+                            <input type="hidden" name="workout_id" value="<?= intval($row['workout_id']) ?>">
+                            <button type="submit" name="delete">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            <?php } ?>
+        </tbody>
+    </table>
+
+</div>
 
 </body>
 </html>
+
 <?php $conn->close(); ?>
 
 <style>
-    /* General Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    color: #333;
-    text-align: center;
+    background-color: #f3f4f6;
+    color: #1f2937;
+    line-height: 1.6;
     padding: 20px;
 }
 
-h1, h2 {
-    color: #222;
+/* Typography */
+h1, h2, h3, h4 {
+    color: #111827;
+    margin-bottom: 10px;
 }
 
-/* Container Styling */
+p, label, legend {
+    font-size: 16px;
+}
+
+/* Page Containers */
 .container {
-    max-width: 800px;
-    margin: auto;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
 }
 
-/* Form Styling */
-form {
+/* Navigation Bar */
+.TopofPage {
+    background-color: #1e3a8a;
+    padding: 20px 40px;
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     align-items: center;
-    gap: 10px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.TopofPage h1#Logo {
+    font-size: 28px;
+    font-weight: bold;
+    color: #ffffff;
+    margin: 0;
+    font-style: italic;
+    text-shadow: 1px 1px 2px #000;
+}
+
+.TopofPage nav {
+    display: flex;
+    gap: 20px;
+}
+
+.TopofPage nav a {
+    color: #e0f2fe;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.TopofPage nav a:hover {
+    background-color: #3b82f6;
+    color: #ffffff;
+}
+
+/* Forms */
+fieldset {
+    border: 2px solid #cbd5e0;
+    padding: 20px;
+    border-radius: 8px;
     margin-bottom: 20px;
+    background-color: #ffffff;
+}
+
+legend {
+    font-style: italic;
+    font-size: 1.2em;
+    background-color: #3b82f6;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 5px;
 }
 
 label {
-    font-weight: bold;
+    display: block;
+    font-weight: 600;
+    margin-top: 12px;
+    margin-bottom: 6px;
 }
 
-input, select {
-    padding: 8px;
-    width: 80%;
-    border-radius: 5px;
-    border: 1px solid #ccc;
+input[type="text"], input[type="email"], input[type="password"], input[type="number"], select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    background-color: #ffffff;
 }
 
-button {
-    background-color: #28a745;
+/* Buttons */
+input[type="submit"], button {
+    background-color: #3b82f6;
     color: white;
+    font-size: 1em;
+    font-weight: 600;
+    padding: 10px 20px;
     border: none;
-    padding: 10px 15px;
+    border-radius: 6px;
     cursor: pointer;
-    border-radius: 5px;
-    transition: 0.3s;
+    transition: background-color 0.3s ease;
 }
 
-button:hover {
-    background-color: #218838;
+input[type="submit"]:hover, button:hover {
+    background-color: #2563eb;
+}
+
+/* Greeting & Misc */
+.Hello {
+    text-align: center;
+    margin: 40px 0;
+}
+
+.Hello h2 {
+    font-size: 26px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+#Finalize {
+    background-color: #6b7280;
+    color: white;
+    font-weight: bold;
+    font-size: 1.1em;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    position: fixed;
+    bottom: 20%;
+    left: 5%;
+    transform: translateX(-50%);
 }
 
 /* Table Styling */
@@ -222,26 +345,49 @@ table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 th, td {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
+    padding: 12px 15px;
+    text-align: center;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 th {
-    background-color: #28a745;
+    background-color: #3b82f6;
     color: white;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-/* Back Button */
+td {
+    font-size: 15px;
+    color: #374151;
+}
+
+tr:hover {
+    background-color: #f1f5f9;
+}
+
+/* Utility */
 .back-button {
     display: inline-block;
     margin-bottom: 20px;
-    background-color: #007bff;
+    background-color: #3b82f6;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
 }
 
 .back-button:hover {
-    background-color: #0056b3;
+    background-color: #2563eb;
 }
 </style>

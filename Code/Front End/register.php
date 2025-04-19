@@ -46,7 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fitify Registration</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="FitifyRules0.css">
 </head>
 <body>
     <div class="container">
@@ -83,7 +83,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         justify-content: center;
         align-items: center;
         height: 100vh;
-        background-color: rgb(88, 88, 234);
+        /* background-color: #3b82f6; */
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     .container {
@@ -110,14 +110,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         border-radius: 5px;
     }
     input[type="submit"] {
-        background: black;
-        color: yellow;
+        background: #3b82f6;
+        color: white;
         margin-top: 15px;
         cursor: pointer;
     }
     input[type="submit"]:hover {
-        background: yellow;
-        color: black;
+        background: #2563eb;
+        color: white;
     }
     p a {
         color: blue;

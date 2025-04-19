@@ -85,17 +85,10 @@ while ($row = $chartData->fetch_assoc()) {
 <head>
     <title>Weight Tracker</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
+    <link rel="stylesheet" href="FitifyRules0.css">
     <style>
-        * {
-            background-color: rgb(88, 88, 234);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: black;
-        }
-
+   
         h1 {
-            background-color: rgb(214, 231, 24);
-            border: 1px solid black;
-            border-width: 3px;
             color: white;
             margin: auto;
             width: 40%;
@@ -117,7 +110,7 @@ while ($row = $chartData->fetch_assoc()) {
         legend {
             font-style: italic;
             font-size: 1.2em;
-            background-color: rgb(214, 231, 24);
+            background-color: #3b82f6;
             color: white;
             padding: 5px 10px;
             border-radius: 5px;
@@ -140,8 +133,8 @@ while ($row = $chartData->fetch_assoc()) {
         }
 
         input[type="submit"] {
-            background-color: black;
-            color: yellow;
+            background-color: #3b82f6;
+            color: white;
             font-size: 1.1em;
             font-weight: bold;
             padding: 10px 20px;
@@ -155,9 +148,8 @@ while ($row = $chartData->fetch_assoc()) {
         }
 
         input[type="submit"]:hover {
-            background-color: yellow;
-            color: black;
-            border: 2px solid black;
+            background-color: #2563eb;
+            
         }
 
         .cancel-link {
@@ -199,7 +191,15 @@ while ($row = $chartData->fetch_assoc()) {
 </head>
 <body>
 
-<h1><?= $editData ? "Edit Weigh-In" : "Log New Weigh-In" ?></h1>
+<!-- Navigation Bar -->
+<header class="TopofPage">
+    <h1 id="Logo">Fitify</h1>
+    <nav>
+        <a href="FitHomepage.php">Home</a>
+        <a href="#">About</a>
+        <a href="#">Contact</a>
+    </nav>
+</header>
 
 <?php if (!empty($message)): ?>
     <div class="message"><?= $message ?></div>

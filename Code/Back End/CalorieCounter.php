@@ -27,27 +27,28 @@ function calculateBMI($height_in, $weight_lbs) {
     return [$bmi, $category];
 }
 
-if (isset($_POST['calc'])) //if calculate BMI submitted
+if (isset($_POST['calc'])) // if calculate BMI submitted
 {
     $feet = intval($_POST["feet"]);
     $inches = intval($_POST["inches"]);
     $weight_lbs = floatval($_POST["weight"]);
-    $name = $_SESSION['user'];
+    $name = $_SESSION['user']; // username
+    $user_id = $_SESSION['user_id']; 
 
     // Convert height to total inches
     $height_in = ($feet * 12) + $inches;
 
     list($bmi, $category) = calculateBMI($height_in, $weight_lbs);
 
-    // Insert into database
-    $stmt = $conn->prepare("INSERT INTO bmi_records (name, height, weight, bmi, category) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param("sddds", $name, $height_in, $weight_lbs, $bmi, $category);
-    
+    // Insert into database with user_id added
+    $stmt = $conn->prepare("INSERT INTO bmi_records (user_id, name, height, weight, bmi, category) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("isddds", $user_id, $name, $height_in, $weight_lbs, $bmi, $category);
+
     if ($stmt->execute()) {
-        $message = "Your BMI is " . number_format($bmi, 2) .", which makes you " . ($category) . "."; 
+        $message = "Your BMI is " . number_format($bmi, 2) . ", which makes you " . ($category) . "."; 
     } else {
         echo "<p>Error: " . $stmt->error . "</p>";
-        $message = "error?";
+        $message = "Error logging BMI.";
     }
 
     $stmt->close();
@@ -101,40 +102,25 @@ if (isset($_POST['add']))
 } //end of if add button scope
 ?> 
 
-<!DOCTYPE HTML> <!--For some reason the namespace declaration won't work unless its the very first thing declared in a file. -->
-<html>
-    <head>
-        <link href="FitifyRules2.css" type="text/css" rel="stylesheet"/>
-        <p id="Logo"> <a href="FitHomepage.php"> fitify </a></p>
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout Tracker</title>
+    <link rel="stylesheet" href="FitifyRules0.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+<header class="TopofPage">
+    <h1 id="Logo">Fitify</h1>
+    <nav>
+        <a href="FitHomepage.php">Home</a>
+        <a href="#">About</a>
+        <a href="#">Contact</a>
+    </nav>
+</header>
 
-        <style>
-
-        #Logo { /*Logo is just text */
-        width: auto; 
-        height: auto; 
-        position: fixed;
-        bottom: 72%;
-        left: 12px; 
-        transform: translateY(-50%);
-        z-index: 9999; 
-        font-size: 58px;
-        text-shadow: 1px 1px 2px black;
-        font-weight: bold;
-        font-style: italic;
-        color: white;
-        background-image: none;
-    }
-    a {
-        color: white;
-        text-decoration:none;
-        background: none !important;
-    } 
-    body, head {
-        background: none !important;
-    }
-        </style>
-    </head>
-    <body>
 <h1> Your Calories </h1>
 <p> <?= $message; ?> </p>
 
