@@ -1,13 +1,9 @@
 <?php 
 namespace Fitify;
-include_once 'MoreDBUtil.php';
+include_once __DIR__ . '/MoreDBUtil.php';
 session_start();
-include 'header.php';
+include_once __DIR__ . '/../Front End/header.php';
 
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit();
-}
 
 $userId = $_SESSION['user_id'];
 
@@ -45,12 +41,6 @@ if ($result4->num_rows > 0) {
     $startingWeightDisplay = "No starting weight logged";
     $weightChangeDisplay = "N/A";
 }
-
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["logout"])) {
-    session_destroy();
-    header("Location: login.php");
-    exit();
-}
 ?>
 
 <!DOCTYPE html>
@@ -69,24 +59,48 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["logout"])) {
         <hr>
 
         <div class="dashboard-section">
-            <h3>📊 Weekly Summary</h3>
-            <p><strong>Calorie Intake (Past 7 Days):</strong> <?= $weeklyCalDisplay ?></p>
-            <p><strong>Current Weight:</strong> <?= $currentWeightDisplay ?></p>
-            <p><strong>Starting Weight:</strong> <?= $startingWeightDisplay ?></p>
-            <p><strong>Weight Change:</strong> <?= $weightChangeDisplay ?></p>
-            <p><strong>Current BMI:</strong> <?= $currentBMIDisplay ?></p>
-            <p><strong>Workouts Logged (Year-to-Date):</strong> <?= $ytdWorkoutDisplay ?></p>
-        </div>
+    <h3>📊 Weekly Summary</h3>
+    
+    <p>
+        <strong><a href="../Back End/CalorieCounter.php">Calorie Intake (Past 7 Days):</a></strong> 
+        <?= $weeklyCalDisplay ?>
+    </p>
+    
+    <p>
+        <strong><a href="../Back End/log_weight.php">Current Weight:</a></strong> 
+        <?= $currentWeightDisplay ?>
+    </p>
+    
+    <p>
+        <strong><a href="../Back End/log_weight.php">Starting Weight:</a></strong> 
+        <?= $startingWeightDisplay ?>
+    </p>
+    
+    <p>
+        <strong><a href="../Back End/log_weight.php">Weight Change:</a></strong> 
+        <?= $weightChangeDisplay ?>
+    </p>
+    
+    <p>
+        <strong><a href="../Back End/bmi_history.php">Current BMI:</a></strong> 
+        <?= $currentBMIDisplay ?>
+    </p>
+    
+    <p>
+        <strong><a href="../Back End/WorkoutTracker.php">Workouts Logged (Year-to-Date):</a></strong> 
+        <?= $ytdWorkoutDisplay ?>
+    </p>
+</div>
 
         <hr>
 
         <div class="dashboard-section">
             <h3>🛠 Explore Your Tools</h3>
-            <p><a href="WorkoutTracker.php">Track a New Workout</a></p>
-            <p><a href="CalorieCounter.php">Log Today's Meals</a></p>
-            <p><a href="View_milestones.php">View Your Milestones</a></p>
+            <p><a href="../Back End/WorkoutTracker.php">Track a New Workout</a></p>
+            <p><a href="../Back End/CalorieCounter.php">Log Today's Meals</a></p>
+            <p><a href="../Front End/view_milestones.php">View Your Milestones</a></p>
         </div>
     </div>
-    <?php include 'footer.php'; ?>
+    <?php include_once __DIR__ . '/../Front End/footer.php'; ?>
 </body>
 </html>

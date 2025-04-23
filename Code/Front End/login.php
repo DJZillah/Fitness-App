@@ -1,7 +1,7 @@
 <?php
 namespace Fitify;
+require_once __DIR__ . '/../Back End/MoreDBUtil.php';
 session_start();
-require 'MoreDBUtil.php'; 
 
 // Select the correct database
 $conn->select_db("fitifyDB"); 
@@ -24,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         if (password_verify($password, $hashed_password)) { 
             $_SESSION['user'] = $username;
             $_SESSION['user_id'] = $user_id; //get userID from session and check if its in database later
-            header("Location: FitHomepage.php");
+            header("Location: ../Back End/FitHomepage.php");
             exit();
         } else {
             $error = "Invalid email or password!";
@@ -42,7 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <head>
     <meta charset="UTF-8">
     <title>Login</title>
-    <link rel="stylesheet" href="FitifyRules.css">
+    <link rel="stylesheet" href="FitifyRulesNew.css">
 </head>
 <body>
     <div class="container">
@@ -68,82 +68,3 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 </body>
 </html>
 
-<style>     /* needed to work with my own styling */
-    body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: rgb(88, 88, 234); /* Outer background */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0;
-}
-h1 {
-    color: black !important;
-    background: rgb(214, 231, 24) !important;
-}
-/* White container */
-.container {
-    background: white !important;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    width: 350px;
-    text-align: center;
-}
-
-/* Ensures form elements stay inside the white box */
-form {
-    background: white !important;
-    padding: 20px;
-    border-radius: 10px;
-}
-
-fieldset {
-    background: white !important;
-    border: 2px solid #ccc;
-    padding: 15px;
-    border-radius: 8px;
-}
-
-/* Override purple background */
-label, p, a {
-    color: black !important;
-    background: transparent !important;
-    display: block;
-}
-
-input {
-    width: 90%;
-    padding: 8px;
-    margin-top: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background: white !important;
-    color: black !important;
-}
-
-/* Submit button styling */
-input[type="submit"] {
-    background: black !important;
-    color: yellow !important;
-    margin-top: 15px;
-    cursor: pointer;
-    width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    border: none;
-    border-radius: 5px;
-}
-
-input[type="submit"]:hover {
-    background: yellow !important;
-    color: black !important;
-}
-
-p, label, input, a {
-    background-color: transparent !important;
-}
-
-
-</style>

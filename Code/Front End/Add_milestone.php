@@ -1,6 +1,6 @@
 <?php
+require_once __DIR__ . '/../Back End/MoreDBUtil.php';  // Include our database connection
 session_start();
-include 'MoreDBUtil.php'; // Include our database connection
 include 'header.php';
 
 if (!isset($_SESSION['user_id'])) {
@@ -78,4 +78,4 @@ $exercise_list = $conn->query("SELECT id, exercise_name FROM exercises");
     </div>
 </body>
 </html>
-<?php include 'footer.php';?>
+<?php include_once __DIR__ . '/../Front End/footer.php'; ?>

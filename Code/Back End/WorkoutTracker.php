@@ -1,8 +1,8 @@
 <?php
 namespace Fitify;
-require 'MoreDBUtil.php';
+include_once __DIR__ . '/MoreDBUtil.php';
 session_start();
-include 'header.php';
+include_once __DIR__ . '/../Front End/header.php';
 
 $conn->select_db("fitifyDB");
 
@@ -138,7 +138,7 @@ $exercise_result = $conn->query($exercise_sql);
 
 <?php
 $conn->close();
-include 'footer.php';
+include_once __DIR__ . '/../Front End/footer.php';
 ?>
 </body>
 </html>

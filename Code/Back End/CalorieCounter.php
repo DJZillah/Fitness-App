@@ -1,8 +1,8 @@
 <?php
 namespace Fitify;
-include_once 'MoreDBUtil.php';
+include_once __DIR__ . '/MoreDBUtil.php';
 session_start();
-include 'header.php';
+include_once __DIR__ . '/../Front End/header.php';
 
 if (empty($_SESSION)) 
 {
@@ -152,4 +152,4 @@ if (isset($_POST['add']))
   </div>
     </body>
 </html>
-    <?php include 'footer.php';?>
+<?php include_once __DIR__ . '/../Front End/footer.php'; ?>

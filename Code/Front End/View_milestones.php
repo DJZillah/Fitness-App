@@ -1,7 +1,9 @@
 <?php
 session_start();
-include 'MoreDBUtil.php';
-include 'header.php';
+
+// Please include your DB utility and header safely using __DIR__
+require_once __DIR__ . '/../Back End/MoreDBUtil.php';
+require_once __DIR__ . '/../Front End/header.php';
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
@@ -62,11 +64,10 @@ $result = $stmt->get_result();
         </div>
 
         <a href="add_milestone.php">Add New Milestone</a>
-        <a href="FitHomepage.php" class="back-button">← Back to Dashboard</a>
+        <a href="../Back End/FitHomepage.php" class="back-button">← Back to Dashboard</a>
     </div>
 </body>
 </html>
 <?php
 $stmt->close();
-include 'footer.php';
-?>
+require_once __DIR__ . '/../Back End/MoreDBUtil.php';?>

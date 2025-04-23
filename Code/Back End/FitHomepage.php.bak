@@ -1,0 +1,145 @@
+<?php
+namespace Fitify;
+include_once 'MoreDBUtil.php';
+session_start();
+
+/*echo '<pre>'; //use for debugging
+print_r($_SESSION);
+echo '</pre>'; */
+
+$weeklyCalSql = "SELECT TotalCal FROM Simple_Cal_Log WHERE LogDate 
+>= DATE_SUB(NOW(), INTERVAL 7 DAY) AND user_id = " . $_SESSION['user_id']; //perhaps make error handling to check if username in session has associated user_id in database
+$weeklyCalDisplay; //when user-specific stuff is sorted, sort by user_id
+
+$result = $conn->query($weeklyCalSql); //Execute query, need to do this when pulling from DB
+
+if ($result->num_rows > 0) 
+{
+    $weeklyTotal = 0;
+    while ($row = $result->fetch_assoc()) 
+    {
+        $weeklyTotal += $row["TotalCal"]; //sum up all calories
+    }
+
+    $weeklyCalDisplay = $weeklyTotal; //display total calories for week on webpage
+} 
+else 
+{
+    $weeklyCalDisplay = "No calories logged this week.";   
+}
+//end cal intake logic
+
+//user's stats display logic
+$currentWeightSql = "SELECT weight FROM weight_log 
+WHERE created_at <= NOW() 
+ORDER BY created_at DESC 
+LIMIT 1"; //will have to modify this later to account for current user's userid
+
+$result1 = $conn->query($currentWeightSql);
+$currentWeightDisplay;
+
+if ($result1->num_rows > 0) 
+{
+    $row = $result1->fetch_assoc();
+    $currentWeight = $row['weight'];
+    $currentWeightDisplay = $currentWeight;
+} 
+else 
+{
+    $currentWeightDisplay = "No weight logged yet";
+}
+
+
+//end current weight logic
+
+$currentBMISql = "SELECT bmi FROM bmi_records 
+WHERE created_at <= NOW() 
+ORDER BY created_at DESC 
+LIMIT 1"; //current BMI, needs to be reconfigured when user stuff is figured out
+
+$result2 = $conn->query($currentBMISql);
+$currentBMIDisplay;
+
+if ($result2->num_rows > 0) 
+{
+    $row = $result2->fetch_assoc();
+    $currentBMI = $row['bmi'];
+    $currentBMIDisplay = $currentBMI;
+} 
+else 
+{
+    $currentBMItDisplay = "No BMI logged yet";
+}
+
+//end php, begin html
+?>
+
+<!DOCTYPE html> 
+
+<style> /* Additional rules for this page */
+.TopofPage {
+    text-align:center;
+    justify-content: center;
+    display: flex;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    border-style: groove;
+    text-align: center;
+    padding: 6px;    
+    border: 1px solid black;
+    margin: 0;
+    border-width: 5px;
+    background-color: rgb(0, 217, 255);
+}
+.TopofPage a {
+    background-color:rgb(214, 231, 24);
+}
+#Calories {
+    line-height: 54px;
+    font-size: 18px;
+}
+.Hello {
+
+}
+</style>
+
+<head>
+    <link href="FitifyRules.css" type="text/css" rel="stylesheet"/>
+
+    <div class="TopofPage">
+        <h1 id="Logo"> fitify </h1>
+    
+        <h1 id="Calories"> <a href="CalorieCounter.php"> Health & Nutrition </a> </h1> <!-- Perhaps combine HMI & Calorie Counter pages into one later. -->
+        <h1 id="Workouts"> <a href="MidTermProduct2.html"> Workouts </a></h1>
+        <h1 id="Milestones"> <a href="View_milestones.php"> Milestones </a></h1>
+        <h1 id="Guidance"> <a href="MidTermDiscountClub.html"> Guidance</a> </h1>
+        <h1 id="Placeholder"> <a href="MidTermFuturePage.html">Placeholder</a> </h1>
+
+    </div>
+
+    <?php
+    if ($_SERVER["REQUEST_METHOD"] === "POST") //if logout is clicked
+    {
+        session_destroy();
+        header("Location: login.php");
+    }
+        
+    ?>
+
+    <div class = "Hello"> 
+        <h2> Hello, <?= $_SESSION['user']; ?> </h2>
+        <form method = "POST">
+            <input type="submit" value="Logout">
+        </form>
+    </div>
+
+</head>
+
+<body>
+    <!-- Put username here when that is a thing later -->
+    <p> This week's calorie intake: <?= $weeklyCalDisplay ?></p>
+    <p> Your Current weight is: <?= $currentWeightDisplay ?></p>
+    <p> Your BMI is currently: <?= $currentBMIDisplay?></p>
+
+
+
+</body>

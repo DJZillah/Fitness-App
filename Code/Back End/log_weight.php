@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'header.php';
+include_once __DIR__ . '/../Front End/header.php';
 
 // Connect to DB
 $servername = "fitify-db.ctq460w22gbq.us-east-2.rds.amazonaws.com";
@@ -161,7 +161,7 @@ while ($row = $chartData->fetch_assoc()) {
 
 <?php
 $conn->close();
-include 'footer.php';
+include_once __DIR__ . '/../Front End/footer.php';
 ?>
 </body>
 </html>
