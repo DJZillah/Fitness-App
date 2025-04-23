@@ -1,0 +1,811 @@
+.theme-switch {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 20px auto 0;
+    font-size: 1rem;
+    color: #1f2937;
+}
+
+.theme-switch input {
+    display: none;
+}
+
+.theme-switch .slider {
+    width: 40px;
+    height: 20px;
+    background-color: #ccc;
+    border-radius: 20px;
+    position: relative;
+    cursor: pointer;
+}
+
+.theme-switch .slider::before {
+    content: "";
+    width: 18px;
+    height: 18px;
+    background-color: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    transition: 0.3s;
+}
+
+.theme-switch input:checked + .slider::before {
+    transform: translateX(20px);
+}
+
+.theme-switch input:checked + .slider {
+    background-color: #4caf50;
+}
+
+/* === Layout & Typography === */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f3f4f6;
+    color: #1f2937;
+    margin: 0;
+    padding: 0;
+}
+
+h1, h2, h3 {
+    color: #111827;
+    margin-bottom: 10px;
+}
+
+p {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 40px;
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    text-align: left;
+}
+
+.Hello {
+    text-align: center;
+    margin: 40px 0;
+}
+
+.Hello h2 {
+    font-size: 26px;
+    font-weight: 600;
+    color: #1e293b;
+}
+table {
+    background-color: white;
+    margin-top: 20px;
+    border-collapse: collapse;
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* === Navigation === */
+.TopofPage {
+    background-color: #1e3a8a;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.TopofPage h1#Logo {
+    font-size: 28px;
+    font-weight: bold;
+    color: #ffffff;
+    margin: 0;
+}
+
+.TopofPage nav {
+    display: flex;
+    gap: 20px;
+}
+
+.TopofPage nav a {
+    color: #e0f2fe;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.TopofPage nav a:hover {
+    background-color: #3b82f6;
+    color: #ffffff;
+}
+
+/* === Form Buttons === */
+input[type="submit"] {
+    padding: 12px 24px;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 16px;
+}
+
+input[type="submit"]:hover {
+    background-color: #2563eb;
+}
+
+/* === Dark Mode === */
+body.dark-mode {
+    background-color: #0f172a;
+    color: #e2e8f0;
+}
+
+body.dark-mode .container {
+    background-color: #1e293b;
+    box-shadow: 0 8px 24px rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .TopofPage {
+    background-color: #0c1b3d;
+}
+
+body.dark-mode .TopofPage nav a {
+    color: #dbeafe;
+}
+
+body.dark-mode .TopofPage nav a:hover {
+    background-color: #1e40af;
+}
+
+body.dark-mode input[type="submit"] {
+    background-color: #1e40af;
+}
+
+body.dark-mode input[type="submit"]:hover {
+    background-color: #1d4ed8;
+}
+
+body.dark-mode .Hello h2 {
+    color: #e2e8f0;
+}
+
+body.dark-mode strong {
+    color: #f1f5f9;
+}
+
+
+body.dark-mode h3 {
+    color: #f1f5f9;
+}
+
+
+body.dark-mode a {
+    color: #93c5fd;
+}
+
+body.dark-mode a:hover {
+    color: #bfdbfe;
+}
+.theme-switch {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 20px auto 0;
+    font-size: 1rem;
+    color: #1f2937; /* default text */
+}
+
+.theme-switch input {
+    display: none;
+}
+
+.theme-switch .slider {
+    width: 40px;
+    height: 20px;
+    background-color: #ccc;
+    border-radius: 20px;
+    position: relative;
+    cursor: pointer;
+}
+
+.theme-switch .slider::before {
+    content: "";
+    width: 18px;
+    height: 18px;
+    background-color: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    transition: 0.3s;
+}
+
+.theme-switch input:checked + .slider::before {
+    transform: translateX(20px);
+}
+
+.theme-switch input:checked + .slider {
+    background-color: #4caf50;
+}
+
+body.dark-mode .theme-switch {
+    color: #e2e8f0;
+}
+
+body.dark-mode .slider {
+    background-color: #555;
+}
+
+body.dark-mode .slider::before {
+    background-color: #f1f5f9;
+}
+/* Fit toggle into nav */
+.TopofPage .theme-switch {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #e0f2fe;
+    font-weight: 600;
+    margin-left: auto;
+}
+
+/* Slider inside nav */
+.TopofPage .theme-switch .slider {
+    width: 40px;
+    height: 20px;
+    background-color: #ccc;
+    border-radius: 20px;
+    position: relative;
+    cursor: pointer;
+}
+
+.TopofPage .theme-switch .slider::before {
+    content: "";
+    width: 18px;
+    height: 18px;
+    background-color: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    transition: 0.3s;
+}
+
+.TopofPage .theme-switch input:checked + .slider {
+    background-color: #4caf50;
+}
+
+.TopofPage .theme-switch input:checked + .slider::before {
+    transform: translateX(20px);
+}
+
+.TopofPage .theme-switch input {
+    display: none;
+}
+
+body.dark-mode .TopofPage .theme-switch {
+    color: #dbeafe;
+}
+
+body.dark-mode .TopofPage .slider {
+    background-color: #555;
+}
+
+body.dark-mode .TopofPage .slider::before {
+    background-color: #f1f5f9;
+}
+/* === Weight Tracker Page Styles === */
+.page-heading {
+    color: white;
+    text-align: center;
+    font-weight: bold;
+    font-style: italic;
+    line-height: 70px;
+    margin: 30px 0 0;
+}
+
+.weight-form {
+    border: 2px solid black;
+    padding: 15px;
+    border-radius: 10px;
+    width: 40%;
+    margin: 20px auto;
+    background-color: white;
+}
+
+.weight-form legend {
+    font-style: italic;
+    font-size: 1.2em;
+    background-color: #3b82f6;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.weight-form label {
+    display: block;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.weight-form input[type="number"] {
+    display: block;
+    width: 90%;
+    margin: auto;
+    padding: 8px;
+    border: 1px solid black;
+    border-radius: 5px;
+    background-color: white;
+}
+
+.weight-form input[type="submit"] {
+    background-color: #3b82f6;
+    color: white;
+    font-size: 1.1em;
+    font-weight: bold;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 15px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.weight-form input[type="submit"]:hover {
+    background-color: #2563eb;
+}
+
+.cancel-link {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.message {
+    text-align: center;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+.weight-table {
+    background-color: white;
+    margin: 20px auto;
+    border-collapse: collapse;
+    width: 90%;
+}
+
+.weight-table th,
+.weight-table td {
+    padding: 10px;
+    border: 1px solid black;
+    text-align: center;
+}
+
+.weight-chart {
+    display: block;
+    margin: 20px auto;
+    background-color: white;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+/* Dark mode overrides */
+body.dark-mode .weight-form,
+body.dark-mode .weight-table,
+body.dark-mode .weight-chart {
+    background-color: #1e293b;
+    color: #e2e8f0;
+    border-color: #555;
+}
+
+body.dark-mode .weight-form legend {
+    background-color: #1d4ed8;
+    color: white;
+}
+
+body.dark-mode .weight-form input[type="number"] {
+    background-color: #2a2a2a;
+    color: #fff;
+    border-color: #444;
+}
+
+body.dark-mode .cancel-link,
+body.dark-mode th,
+body.dark-mode td {
+    color: #f0f0f0;
+}
+.page-heading {
+    text-align: center;
+    font-weight: bold;
+    font-style: italic;
+    line-height: 70px;
+    margin: 30px 0 0;
+    color: #1f2937; /* <-- light mode text color */
+}
+
+/* Override in dark mode */
+body.dark-mode .page-heading {
+    color: #e2e8f0;
+}
+/* === Workout Tracker Page === */
+
+.page-heading {
+    text-align: center;
+    font-weight: bold;
+    font-style: italic;
+    font-size: 2rem;
+    line-height: 70px;
+    margin: 30px 0;
+    color: #1f2937;
+}
+
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+}
+
+/* Workout Form */
+fieldset {
+    border: 2px solid #cbd5e0;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    background-color: #ffffff;
+}
+
+legend {
+    font-style: italic;
+    font-size: 1.2em;
+    background-color: #3b82f6;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 5px;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-top: 12px;
+    margin-bottom: 6px;
+}
+
+input[type="number"],
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    background-color: #ffffff;
+}
+
+/* Buttons */
+input[type="submit"],
+button {
+    background-color: #3b82f6;
+    color: white;
+    font-size: 1em;
+    font-weight: 600;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+input[type="submit"]:hover,
+button:hover {
+    background-color: #2563eb;
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: center;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+th {
+    background-color: #3b82f6;
+    color: white;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+td {
+    font-size: 15px;
+    color: #374151;
+}
+
+tr:hover {
+    background-color: #f1f5f9;
+}
+
+/* === Dark Mode Support === */
+body.dark-mode .container,
+body.dark-mode fieldset,
+body.dark-mode table {
+    background-color: #1e293b;
+    color: #e2e8f0;
+}
+
+body.dark-mode legend {
+    background-color: #1d4ed8;
+}
+
+body.dark-mode th {
+    background-color: #1d4ed8;
+}
+
+body.dark-mode td {
+    color: #f1f5f9;
+}
+
+body.dark-mode input,
+body.dark-mode select {
+    background-color: #2a2a2a;
+    color: #fff;
+    border-color: #444;
+}
+.section-heading {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-top: 30px;
+    margin-bottom: 10px;
+}
+
+body.dark-mode .section-heading {
+    color: #e2e8f0;
+}
+/* ===== Centered Form Container ===== */
+.form-container {
+    max-width: 500px;
+    margin: 80px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    text-align: left;
+}
+
+.form-container h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+    color: #1f2937;
+}
+
+.form-container label {
+    font-weight: 600;
+    display: block;
+    margin-top: 12px;
+    margin-bottom: 5px;
+}
+
+.form-container input[type="number"],
+.form-container select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    background-color: #ffffff;
+    margin-bottom: 15px;
+}
+
+.form-container input[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.form-container input[type="submit"]:hover {
+    background-color: #2563eb;
+}
+
+.form-container a {
+    display: block;
+    text-align: center;
+    margin-top: 12px;
+    color: #3b82f6;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+/* ===== Dark Mode Adjustments ===== */
+body.dark-mode .form-container {
+    background-color: #1e293b;
+    color: #e2e8f0;
+}
+
+body.dark-mode .form-container h1,
+body.dark-mode .form-container label,
+body.dark-mode .form-container p {
+    color: #e2e8f0;
+}
+
+body.dark-mode .form-container input[type="number"],
+body.dark-mode .form-container select {
+    background-color: #2a2a2a;
+    color: #ffffff;
+    border-color: #444;
+}
+
+body.dark-mode .form-container input[type="submit"] {
+    background-color: #2563eb;
+    color: #fff;
+}
+
+body.dark-mode .form-container input[type="submit"]:hover {
+    background-color: #1d4ed8;
+}
+
+body.dark-mode .form-container a {
+    color: #93c5fd;
+}
+/* Dark mode override */
+body.dark-mode .TopofPage .theme-switch {
+    color: #dbeafe;
+}
+
+body.dark-mode .TopofPage .slider {
+    background-color: #555;
+}
+
+body.dark-mode .TopofPage .slider::before {
+    background-color: #f1f5f9;
+}
+/* === Dropdown for "More" === */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropbtn {
+    background-color: transparent;
+    color: #e0f2fe;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    padding: 10px 16px;
+}
+
+.dropbtn:hover {
+    background-color: #3b82f6;
+    color: #ffffff;
+    border-radius: 8px;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: #ffffff;
+    min-width: 180px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    border-radius: 8px;
+    z-index: 99;
+    padding: 12px;
+}
+
+.dropdown-content a,
+.dropdown-content label {
+    display: block;
+    padding: 8px 12px;
+    color: #1f2937;
+    text-decoration: none;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.dropdown-content a:hover,
+.dropdown-content label:hover {
+    background-color: #f3f4f6;
+    border-radius: 4px;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Dark mode overrides */
+body.dark-mode .dropdown-content {
+    background-color: #1e293b;
+    color: #e2e8f0;
+}
+
+body.dark-mode .dropdown-content a,
+body.dark-mode .dropdown-content label {
+    color: #e2e8f0;
+}
+
+body.dark-mode .dropdown-content a:hover,
+body.dark-mode .dropdown-content label:hover {
+    background-color: #334155;
+}
+/* Light mode */
+.dropdown-content {
+    background-color: #ffffff;
+}
+
+.dropdown-content a,
+.dropdown-content label {
+    color: #1f2937;
+}
+
+.dropdown-content a:hover,
+.dropdown-content label:hover {
+    background-color: #f3f4f6;
+    border-radius: 4px;
+}
+
+/* Dark mode */
+body.dark-mode .dropdown-content {
+    background-color: #1e293b;
+}
+
+body.dark-mode .dropdown-content a,
+body.dark-mode .dropdown-content label {
+    color: #e2e8f0;
+}
+
+body.dark-mode .dropdown-content a:hover,
+body.dark-mode .dropdown-content label:hover {
+    background-color: #334155;
+}
+.dropdown-content a,
+.dropdown-content label {
+    color: #1f2937 !important;
+    background-color: #ffffff; /* ensure a white bg behind the text tweak later maybe (probably not) */
+}
+
+.dropdown-content {
+    background-color: #ffffff !important;
+}
+
+body.dark-mode .dropdown-content {
+    background-color: #1e293b;
+}
+body.dark-mode .dropdown-content a,
+body.dark-mode .dropdown-content label {
+    color: #e2e8f0;
+}
