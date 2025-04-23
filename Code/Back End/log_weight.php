@@ -1,7 +1,8 @@
 <?php
-session_start(); 
+session_start();
+include 'header.php';
 
-//connect to the database
+// Connect to DB
 $servername = "fitify-db.ctq460w22gbq.us-east-2.rds.amazonaws.com";
 $username = "root";
 $password = "fitify123";
@@ -15,12 +16,10 @@ if ($conn->connect_error) {
 $userId = $_SESSION['user_id'];
 $message = "";
 
-//handle form submission
+// Handle new or updated entry
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $weight = $_POST["weight"];
-
     if (is_numeric($weight) && $weight > 0) {
-        //if editing an existing entry
         if (isset($_POST["edit_id"])) {
             $editId = intval($_POST["edit_id"]);
             $stmt = $conn->prepare("UPDATE weight_log SET weight = ? WHERE log_id = ? AND user_id = ?");
@@ -35,29 +34,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->close();
             $message = "New weight logged successfully.";
         }
-
-        //redirect to avoid form resubmission on page refresh
         header("Location: " . $_SERVER['PHP_SELF'] . "?msg=" . urlencode($message));
         exit();
     }
 }
 
-//handle delete
+// Handle delete
 if (isset($_GET['delete'])) {
     $deleteId = intval($_GET['delete']);
-    if ($deleteId > 0) {
-        $conn->query("DELETE FROM weight_log WHERE log_id = $deleteId AND user_id = $userId");
-        $message = "Weight entry deleted successfully.";
-        header("Location: " . $_SERVER['PHP_SELF'] . "?msg=" . urlencode($message));
-        exit();
-    }
+    $conn->query("DELETE FROM weight_log WHERE log_id = $deleteId AND user_id = $userId");
+    $message = "Weight entry deleted successfully.";
+    header("Location: " . $_SERVER['PHP_SELF'] . "?msg=" . urlencode($message));
+    exit();
 }
 
 if (isset($_GET['msg'])) {
     $message = htmlspecialchars($_GET['msg']);
 }
 
-//fetch data to edit if requested
+// Fetch record to edit
 $editData = null;
 if (isset($_GET['edit'])) {
     $editId = intval($_GET['edit']);
@@ -67,9 +62,10 @@ if (isset($_GET['edit'])) {
     }
 }
 
+// Get all weight entries for user
 $result = $conn->query("SELECT * FROM weight_log WHERE user_id = $userId ORDER BY created_at DESC");
 
-//fetch data for the chart in ascending order to show progress over time
+// Get data for chart (ascending order)
 $chartData = $conn->query("SELECT weight, created_at FROM weight_log WHERE user_id = $userId ORDER BY created_at ASC");
 $weights = [];
 $dates = [];
@@ -81,137 +77,27 @@ while ($row = $chartData->fetch_assoc()) {
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>Weight Tracker</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
-    <link rel="stylesheet" href="FitifyRules0.css">
-    <style>
-   
-        h1 {
-            color: white;
-            margin: auto;
-            width: 40%;
-            text-align: center;
-            line-height: 70px;
-            font-weight: bold;
-            font-style: italic;
-        }
-
-        fieldset {
-            border: 2px solid black;
-            padding: 15px;
-            border-radius: 10px;
-            width: 40%;
-            margin: 20px auto;
-            background-color: white;
-        }
-
-        legend {
-            font-style: italic;
-            font-size: 1.2em;
-            background-color: #3b82f6;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-        }
-
-        label {
-            display: block;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-
-        input[type="number"] {
-            display: block;
-            width: 90%;
-            margin: auto;
-            padding: 8px;
-            border: 1px solid black;
-            border-radius: 5px;
-            background-color: white;
-        }
-
-        input[type="submit"] {
-            background-color: #3b82f6;
-            color: white;
-            font-size: 1.1em;
-            font-weight: bold;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 15px;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        input[type="submit"]:hover {
-            background-color: #2563eb;
-            
-        }
-
-        .cancel-link {
-            display: block;
-            text-align: center;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-
-        .message {
-            text-align: center;
-            font-weight: bold;
-            margin-top: 15px;
-        }
-
-        table {
-            background-color: white;
-            margin-top: 20px;
-            border-collapse: collapse;
-            width: 90%;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        th, td {
-            padding: 10px;
-            border: 1px solid black;
-            text-align: center;
-        }
-
-        canvas {
-            display: block;
-            margin: 20px auto;
-            background-color: white;
-            border-radius: 10px;
-            padding: 10px;
-        }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+<!-- Page Heading -->
+<h1 class="page-heading">Weight Tracker</h1>
 
-<!-- Navigation Bar -->
-<header class="TopofPage">
-    <h1 id="Logo">Fitify</h1>
-    <nav>
-        <a href="FitHomepage.php">Home</a>
-        <a href="#">About</a>
-        <a href="#">Contact</a>
-    </nav>
-</header>
-
+<!-- Optional message box -->
 <?php if (!empty($message)): ?>
     <div class="message"><?= $message ?></div>
 <?php endif; ?>
 
-<!--form for submitting weight-->
+<!-- Weight Entry Form -->
 <form method="POST">
-    <fieldset>
+    <fieldset class="weight-form">
         <legend><?= $editData ? "Edit Entry" : "New Entry" ?></legend>
         <label for="weight">Weight (lbs):</label>
-        <input type="number" step="0.1" name="weight" required
-               value="<?= $editData ? $editData['weight'] : '' ?>">
+        <input type="number" step="0.1" name="weight" required value="<?= $editData ? $editData['weight'] : '' ?>">
+
         <?php if ($editData): ?>
             <input type="hidden" name="edit_id" value="<?= $editData['log_id'] ?>">
             <input type="submit" value="Update Weight">
@@ -222,9 +108,9 @@ while ($row = $chartData->fetch_assoc()) {
     </fieldset>
 </form>
 
-<!--weight history table-->
+<!-- Weight History Table -->
 <h2 style="text-align: center;">Weight History</h2>
-<table>
+<table class="weight-table">
     <tr>
         <th>Log ID</th>
         <th>Weight</th>
@@ -237,7 +123,6 @@ while ($row = $chartData->fetch_assoc()) {
             <td><?= $row['weight'] ?> lbs</td>
             <td><?= $row['created_at'] ?></td>
             <td>
-                <!--edit or delete entries-->
                 <a href="?edit=<?= $row['log_id'] ?>">Edit</a> |
                 <a href="?delete=<?= $row['log_id'] ?>" onclick="return confirm('Delete this entry?')">Delete</a>
             </td>
@@ -245,20 +130,19 @@ while ($row = $chartData->fetch_assoc()) {
     <?php endwhile; ?>
 </table>
 
-<!--chart display for weight progression-->
+<!-- Chart -->
 <h2 style="text-align: center;">Weight Progress Chart</h2>
-<canvas id="weightChart" width="600" height="300"></canvas>
+<canvas id="weightChart" width="600" height="300" class="weight-chart"></canvas>
 
 <script>
-    //chart.js
     const ctx = document.getElementById('weightChart').getContext('2d');
     const weightChart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: <?= json_encode($dates) ?>, //x axis: dates
+            labels: <?= json_encode($dates) ?>,
             datasets: [{
                 label: 'Weight (lbs)',
-                data: <?= json_encode($weights) ?>, //y axis: weights
+                data: <?= json_encode($weights) ?>,
                 borderColor: 'red',
                 borderWidth: 2,
                 fill: true,
@@ -268,14 +152,16 @@ while ($row = $chartData->fetch_assoc()) {
         options: {
             scales: {
                 y: {
-                    beginAtZero: false 
+                    beginAtZero: false
                 }
             }
         }
     });
 </script>
 
+<?php
+$conn->close();
+include 'footer.php';
+?>
 </body>
 </html>
-
-<?php $conn->close(); ?>
