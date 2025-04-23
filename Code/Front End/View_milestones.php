@@ -32,9 +32,12 @@ $result = $stmt->get_result();
 <head>
     <meta charset="UTF-8">
     <title>Your Milestones</title>
-    <link rel="stylesheet" href="FitifyRulesDraft.css">
 </head>
 <body>
+
+<?php if (!empty($message)): ?>
+    <div class="message"><?= $message ?></div>
+<?php endif; ?>
     <div class="content-container">
         <h1>Your Milestones</h1>
 
