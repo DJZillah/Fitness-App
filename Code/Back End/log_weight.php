@@ -24,17 +24,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $editId = intval($_POST["edit_id"]);
             $stmt = $conn->prepare("UPDATE weight_log SET weight = ? WHERE log_id = ? AND user_id = ?");
             $stmt->bind_param("dii", $weight, $editId, $userId);
-            $stmt->execute();
-            $stmt->close();
-            $message = "Weight updated successfully.";
         } else {
             $stmt = $conn->prepare("INSERT INTO weight_log (weight, user_id) VALUES (?, ?)");
             $stmt->bind_param("di", $weight, $userId);
-            $stmt->execute();
-            $stmt->close();
-            $message = "New weight logged successfully.";
         }
-        header("Location: " . $_SERVER['PHP_SELF'] . "?msg=" . urlencode($message));
+        $stmt->execute();
+        $stmt->close();
+        header("Location: " . $_SERVER['PHP_SELF'] . "?msg=Saved");
         exit();
     }
 }
@@ -43,8 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 if (isset($_GET['delete'])) {
     $deleteId = intval($_GET['delete']);
     $conn->query("DELETE FROM weight_log WHERE log_id = $deleteId AND user_id = $userId");
-    $message = "Weight entry deleted successfully.";
-    header("Location: " . $_SERVER['PHP_SELF'] . "?msg=" . urlencode($message));
+    header("Location: " . $_SERVER['PHP_SELF'] . "?msg=Deleted");
     exit();
 }
 
@@ -62,15 +57,49 @@ if (isset($_GET['edit'])) {
     }
 }
 
-// Get all weight entries for user
-$result = $conn->query("SELECT * FROM weight_log WHERE user_id = $userId ORDER BY created_at DESC");
+// Filter
+$filter = $_GET['filter'] ?? 'all';
+$filterQuery = "1=1";
+$summaryMessage = "";
 
-// Get data for chart (ascending order)
-$chartData = $conn->query("SELECT weight, created_at FROM weight_log WHERE user_id = $userId ORDER BY created_at ASC");
+if ($filter === 'week') {
+    $filterQuery = "created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)";
+    $summaryLabel = "this week";
+} elseif ($filter === 'month') {
+    $filterQuery = "MONTH(created_at) = MONTH(NOW()) AND YEAR(created_at) = YEAR(NOW())";
+    $summaryLabel = "this month";
+}
+
+// Summary message
+if ($filter !== 'all') {
+    $summarySql = "SELECT weight FROM weight_log WHERE user_id = $userId AND $filterQuery ORDER BY created_at ASC";
+    $summaryResult = $conn->query($summarySql);
+    $weights = [];
+    while ($row = $summaryResult->fetch_assoc()) {
+        $weights[] = $row['weight'];
+    }
+    if (count($weights) > 1) {
+        $start = $weights[0];
+        $end = end($weights);
+        $diff = round($end - $start, 1);
+        if ($diff > 0) {
+            $summaryMessage = "You gained {$diff} lbs $summaryLabel.";
+        } elseif ($diff < 0) {
+            $summaryMessage = "You lost " . abs($diff) . " lbs $summaryLabel.";
+        } else {
+            $summaryMessage = "No weight change $summaryLabel.";
+        }
+    }
+}
+
+// Fetch logs
+$result = $conn->query("SELECT * FROM weight_log WHERE user_id = $userId AND $filterQuery ORDER BY created_at DESC");
+
+// Chart data
+$chartQuery = $conn->query("SELECT weight, created_at FROM weight_log WHERE user_id = $userId AND $filterQuery ORDER BY created_at ASC");
 $weights = [];
 $dates = [];
-
-while ($row = $chartData->fetch_assoc()) {
+while ($row = $chartQuery->fetch_assoc()) {
     $weights[] = $row['weight'];
     $dates[] = $row['created_at'];
 }
@@ -83,56 +112,65 @@ while ($row = $chartData->fetch_assoc()) {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-<!-- Page Heading -->
-<h1 class="page-heading">Weight Tracker</h1>
 
-<!-- Optional message box -->
-<?php if (!empty($message)): ?>
-    <div class="message"><?= $message ?></div>
-<?php endif; ?>
+<div class="container">
+    <h1 class="page-heading">Weight Tracker</h1>
 
-<!-- Weight Entry Form -->
-<form method="POST">
-    <fieldset class="weight-form">
-        <legend><?= $editData ? "Edit Entry" : "New Entry" ?></legend>
-        <label for="weight">Weight (lbs):</label>
-        <input type="number" step="0.1" name="weight" required value="<?= $editData ? $editData['weight'] : '' ?>">
+    <?php if (!empty($message)): ?>
+        <div class="message"><?= $message ?></div>
+    <?php endif; ?>
 
-        <?php if ($editData): ?>
-            <input type="hidden" name="edit_id" value="<?= $editData['log_id'] ?>">
-            <input type="submit" value="Update Weight">
-            <a class="cancel-link" href="<?= $_SERVER['PHP_SELF'] ?>">Cancel</a>
-        <?php else: ?>
-            <input type="submit" value="Log Weight">
-        <?php endif; ?>
-    </fieldset>
-</form>
+    <form method="POST">
+        <fieldset class="weight-form">
+            <legend><?= $editData ? "Edit Entry" : "New Entry" ?></legend>
+            <label for="weight">Weight (lbs):</label>
+            <input type="number" step="0.1" name="weight" required value="<?= $editData['weight'] ?? '' ?>">
 
-<!-- Weight History Table -->
-<h2 style="text-align: center;">Weight History</h2>
-<table class="weight-table">
-    <tr>
-        <th>Log ID</th>
-        <th>Weight</th>
-        <th>Date</th>
-        <th>Actions</th>
-    </tr>
-    <?php while ($row = $result->fetch_assoc()): ?>
+            <?php if ($editData): ?>
+                <input type="hidden" name="edit_id" value="<?= $editData['log_id'] ?>">
+                <input type="submit" value="Update Weight">
+                <a class="cancel-link" href="<?= $_SERVER['PHP_SELF'] ?>">Cancel</a>
+            <?php else: ?>
+                <input type="submit" value="Log Weight">
+            <?php endif; ?>
+        </fieldset>
+    </form>
+
+    <div class="message" style="text-align: center;">
+        Filter: 
+        <a href="?filter=all">All</a> |
+        <a href="?filter=week">This Week</a> |
+        <a href="?filter=month">This Month</a>
+    </div>
+
+    <?php if (!empty($summaryMessage)): ?>
+        <div class="message" style="text-align: center;"><?= $summaryMessage ?></div>
+    <?php endif; ?>
+
+    <h2 class="section-heading">Weight History</h2>
+    <table class="weight-table">
         <tr>
-            <td><?= $row['log_id'] ?></td>
-            <td><?= $row['weight'] ?> lbs</td>
-            <td><?= $row['created_at'] ?></td>
-            <td>
-                <a href="?edit=<?= $row['log_id'] ?>">Edit</a> |
-                <a href="?delete=<?= $row['log_id'] ?>" onclick="return confirm('Delete this entry?')">Delete</a>
-            </td>
+            <th>Log ID</th>
+            <th>Weight</th>
+            <th>Date</th>
+            <th>Actions</th>
         </tr>
-    <?php endwhile; ?>
-</table>
+        <?php while ($row = $result->fetch_assoc()): ?>
+            <tr>
+                <td><?= $row['log_id'] ?></td>
+                <td><?= $row['weight'] ?> lbs</td>
+                <td><?= $row['created_at'] ?></td>
+                <td>
+                    <a href="?edit=<?= $row['log_id'] ?>">Edit</a> |
+                    <a href="?delete=<?= $row['log_id'] ?>" onclick="return confirm('Delete this entry?')">Delete</a>
+                </td>
+            </tr>
+        <?php endwhile; ?>
+    </table>
 
-<!-- Chart -->
-<h2 style="text-align: center;">Weight Progress Chart</h2>
-<canvas id="weightChart" width="600" height="300" class="weight-chart"></canvas>
+    <h2 class="section-heading">Weight Progress Chart</h2>
+    <canvas id="weightChart" width="600" height="300" class="weight-chart"></canvas>
+</div>
 
 <script>
     const ctx = document.getElementById('weightChart').getContext('2d');
