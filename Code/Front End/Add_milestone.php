@@ -42,9 +42,11 @@ $exercise_list = $conn->query("SELECT id, exercise_name FROM exercises");
 <head>
     <meta charset="UTF-8">
     <title>Add Milestone</title>
-    <link rel="stylesheet" href="FitifyRulesDraft.css">
 </head>
 <body>
+<?php if (!empty($message)): ?>
+    <div class="message"><?= $message ?></div>
+<?php endif; ?>
     <div class="form-container">
         <h1>Add Milestone</h1>
 
@@ -71,11 +73,9 @@ $exercise_list = $conn->query("SELECT id, exercise_name FROM exercises");
         </form>
 
         <br>
-        <a href="FitHomepage.php" class="back-button">← Back to Dashboard</a>
+        <a href="FitHomepage.php" class="back-button">Back to Dashboard</a>
         <a href="view_milestones.php">View Your Milestones</a>
     </div>
 </body>
 </html>
-<?php
-include 'footer.php';
-?>
+<?php include 'footer.php';?>
