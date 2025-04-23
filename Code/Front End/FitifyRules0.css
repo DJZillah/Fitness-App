@@ -1,0 +1,153 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f3f4f6;
+    color: #1f2937;
+    line-height: 1.6;
+    padding: 20px;
+}
+
+/* Typography */
+h1, h2, h3, h4 {
+    color: #111827;
+    margin-bottom: 10px;
+}
+
+p, label, legend {
+    font-size: 16px;
+}
+
+/* Page Containers */
+.container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+}
+
+/* Navigation Bar */
+.TopofPage {
+    background-color: #1e3a8a;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.TopofPage h1#Logo {
+    font-size: 28px;
+    font-weight: bold;
+    color: #ffffff;
+    margin: 0;
+    font-style: italic;
+    text-shadow: 1px 1px 2px #000;
+}
+
+.TopofPage nav {
+    display: flex;
+    gap: 20px;
+}
+
+.TopofPage nav a {
+    color: #e0f2fe;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.TopofPage nav a:hover {
+    background-color: #3b82f6;
+    color: #ffffff;
+}
+
+/* Forms */
+fieldset {
+    border: 2px solid #cbd5e0;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    background-color: #ffffff;
+}
+
+legend {
+    font-style: italic;
+    font-size: 1.2em;
+    background-color: #3b82f6;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 5px;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-top: 12px;
+    margin-bottom: 6px;
+}
+
+input[type="text"], input[type="email"], input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    background-color: #ffffff;
+}
+
+/* Buttons */
+input[type="submit"], button {
+    background-color: #3b82f6;
+    color: white;
+    font-size: 1em;
+    font-weight: 600;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+input[type="submit"]:hover, button:hover {
+    background-color: #2563eb;
+}
+
+/* Greeting & Misc */
+.Hello {
+    text-align: center;
+    margin: 40px 0;
+}
+
+.Hello h2 {
+    font-size: 26px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+#Finalize {
+    background-color: #6b7280;
+    color: white;
+    font-weight: bold;
+    font-size: 1.1em;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    position: fixed;
+    bottom: 20%;
+    left: 5%;
+    transform: translateX(-50%);
+}
+
