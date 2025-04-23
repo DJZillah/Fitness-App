@@ -2,6 +2,7 @@
 namespace Fitify;
 include_once 'MoreDBUtil.php';
 session_start();
+include 'header.php';
 
 if (empty($_SESSION)) 
 {
@@ -50,13 +51,10 @@ if (isset($_POST['calc'])) // if calculate BMI submitted
         echo "<p>Error: " . $stmt->error . "</p>";
         $message = "Error logging BMI.";
     }
-
     $stmt->close();
     $conn->close();
 }
-
  //idk im not gonna touch this 
-
 //below starts calorie intake tracker logic
 $totalCal = 0;
 $logDate = date('Y-m-d H:i:s');
@@ -78,7 +76,6 @@ if (isset($_POST['add']))
             $message = "Please ensure only numbers are entered.";
         }
     }
-
     if ($validInputs) 
     {
         foreach ($fields as $field) { //fetch the associated entered values by the user and get the sum
@@ -87,7 +84,6 @@ if (isset($_POST['add']))
                 $totalCal += $_POST[$field];
             }
         }
-
         $sql = "INSERT INTO Simple_Cal_Log (TotalCal, LogDate, user_id) 
         VALUES ($totalCal, '$logDate', " . $_SESSION['user_id'] . ")"; //for some reason user_id wants to be concatenated
          //Simple_Cal_Log has auto-increment primary key "LogID"
@@ -108,50 +104,52 @@ if (isset($_POST['add']))
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Workout Tracker</title>
-    <link rel="stylesheet" href="FitifyRules0.css">
 </head>
 <body>
-    <!-- Navigation Bar -->
-<header class="TopofPage">
-    <h1 id="Logo">Fitify</h1>
-    <nav>
-        <a href="FitHomepage.php">Home</a>
-        <a href="#">About</a>
-        <a href="#">Contact</a>
-    </nav>
-</header>
+<div class="form-container">
+    <h1>Your Calories &amp; BMI</h1>
+    <?php if ($message): ?>
+      <p class="message"><?= htmlspecialchars($message) ?></p>
+    <?php endif; ?>
 
-<h1> Your Calories </h1>
-<p> <?= $message; ?> </p>
-
-    
+    <!-- Calorie Entry Form -->
     <form action="CalorieCounter.php" method="post">
-        <fieldset>
-            <legend>Today's Calories</legend>
-            <?php foreach ($fields as $field): ?>
-                <div class = "form-row">
-                    <label> <?= ucfirst($field) ?>: 
-                        <input type="text" size="3" maxlength="5" name="<?= $field ?>" 
-                        value="<?= isset($_SESSION["valid" . ucfirst($field)]) ? $_SESSION["valid" . ucfirst($field)] : ''; ?>"/>
-                    </label><br/>
-                </div>
-            <?php endforeach; ?>
-            <label><input type="submit" value="Add" name="add"></label> <!--lowercase one for logic-->
-        </fieldset>
-
-    </form> <br/>
-
-    <h2>BMI Calculator</h2>
+      <fieldset>
+        <legend>Today's Calories</legend>
+        <?php foreach (['breakfast','lunch','dinner','misc'] as $meal): ?>
+          <label for="<?= $meal ?>">
+            <?= ucfirst($meal) ?>:
+            <input
+              type="number"
+              id="<?= $meal ?>"
+              name="<?= $meal ?>"
+              min="0"
+              step="1"
+              style="width:4em;"
+            />
+          </label>
+        <?php endforeach; ?>
+        <input type="submit" name="add" value="Add Calories">
+      </fieldset>
+    </form>
+    <hr>
+    <!-- BMI Calculator -->
     <form method="POST" id="BMI">
+      <fieldset>
+        <legend>BMI Calculator</legend>
 
         <label for="feet">Height:</label>
-        <input type="number" name="feet" required placeholder="Feet" min="0">
-        <input type="number" name="inches" required placeholder="Inches" min="0" max="11"><br>
-
+        <div style="display:flex; gap:0.5em; margin-bottom:1em;">
+          <input type="number" name="feet" id="feet" required placeholder="ft" min="0">
+          <input type="number" name="inches" required placeholder="in" min="0" max="11">
+        </div>
         <label for="weight">Weight (lbs):</label>
-        <input type="text" name="weight" required><br>
-
+        <input type="number" name="weight" id="weight" required placeholder="e.g. 150">
         <input type="submit" name="calc" value="Calculate BMI">
+      </fieldset>
     </form>
+    <a href="FitHomepage.php" class="back-button">Back to Dashboard</a>
+  </div>
     </body>
 </html>
+    <?php include 'footer.php';?>
