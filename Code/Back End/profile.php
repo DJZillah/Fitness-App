@@ -3,6 +3,17 @@ namespace Fitify;
 session_start();
 require_once __DIR__ . '/../Back End/MoreDBUtil.php';
 require_once __DIR__ . '/../Front End/header.php';
+require_once __DIR__ . '/../Back End/Badges.php';
+
+$timeout_duration = 600; //10 minutes
+if (isset($_SESSION['LAST_ACTIVITY']) &&
+    (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) 
+    {
+        session_unset();
+        session_destroy();
+        header("Location: login.php"); 
+        exit();
+    } //timeout timer
 
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["logout"])) {
     session_destroy();
@@ -10,7 +21,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["logout"])) {
     exit();
 }
 
-$user_id = $_SESSION['user_id'] ?? null;
+$user_id = $_SESSION['user_id'] ?? null; //userID in the session user for queries 
+$badges = new BadgeTrack($user_id, $conn); //object to track badge progress
 
 if (!$user_id) {
     header("Location: ../Front End/login.php");
@@ -40,6 +52,22 @@ $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
 $user = $result->fetch_assoc();
+
+//---Badges---
+
+$calBadge = false;
+$calBadsql = "SELECT SUM(TotalCal) AS total FROM Simple_Cal_Log WHERE user_id = $user_id";
+$result = mysqli_query($conn, $calBadsql);
+
+/*if ($row = mysqli_fetch_assoc($result)) 
+{
+    $bigTotal = $row['total'];
+}
+
+if ($bigTotal >= 75000) 
+{
+    $calBadge = true;
+} */
 ?>
 
 <!DOCTYPE html>
@@ -73,6 +101,23 @@ $user = $result->fetch_assoc();
             <label>Height (in):
                 <input type="number" name="height" step="0.1" value="<?= htmlspecialchars($user['height'] ?? '') ?>">
             </label><br>
+
+            <div class="Badges"> <!-- bit messy & long but it works -->
+                <legend> Badges: </legend>
+                <label> Registered your account
+                    <img src="default.png"
+                    width="32" height="32"
+                    style="vertical-align: middle; margin-left: 8px; margin-bottom: 14px;" >
+                </label> <br>
+                <?php if ($badges->ConsumeCheck()): ?>
+                    <label> Burned 75,000 Calories
+                    <img src="consume.png"
+                    width="32" height="32"
+                    style="vertical-align: middle; margin-left: 8px; margin-bottom: 14px;">
+                </label> <br>
+                <?php endif; ?>
+               
+            </div>
 
             <button type="submit">Update Profile</button>
         </form>
