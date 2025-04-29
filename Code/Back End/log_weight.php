@@ -1,9 +1,10 @@
 <?php
 session_start();
 include_once __DIR__ . '/../Front End/header.php';
+include_once __DIR__ . '/../Back End/MoreDBUtil.php';
 
 // Connect to DB
-$servername = "fitify-db.ctq460w22gbq.us-east-2.rds.amazonaws.com";
+/*$servername = "fitify-db.ctq460w22gbq.us-east-2.rds.amazonaws.com";
 $username = "root";
 $password = "fitify123";
 $database = "fitifyDB";
@@ -11,7 +12,7 @@ $database = "fitifyDB";
 $conn = new mysqli($servername, $username, $password, $database);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
-}
+} */
 
 $userId = $_SESSION['user_id'];
 $message = "";
@@ -114,7 +115,7 @@ while ($row = $chartQuery->fetch_assoc()) {
 <body>
 
 <div class="container">
-    <h1 class="page-heading">Weight Tracker</h1>
+    <h1 class="page-heading">Weight Tracker Poob </h1>
 
     <?php if (!empty($message)): ?>
         <div class="message"><?= $message ?></div>
