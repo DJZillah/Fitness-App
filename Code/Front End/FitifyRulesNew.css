@@ -932,3 +932,4 @@ body.dark-mode .dropdown-content label {
   .modal-content .btn.btn-danger:hover {
     background-color: color-mix(in srgb, var(--color-danger, #e74c3c) 80%, #000);
   }
+

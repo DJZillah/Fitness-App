@@ -95,12 +95,33 @@ if (isset($_POST['add'])) { //when enter calories button is clicked
     <title>Calories & BMI</title>
 </head>
 <body>
+
+<?php
+// Fetch the latest calorie goal
+$user_id = $_SESSION['user_id'];
+
+$stmt = $conn->prepare("SELECT calorie_goal, goal_type FROM fitness_goals WHERE user_id = ? ORDER BY start_date DESC LIMIT 1");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$latestGoal = $result->fetch_assoc();
+?>
+
 <div class="form-container">
+
+<?php if ($latestGoal): ?>
+    <p><strong>Your Current Goal:</strong> <?= $latestGoal['calorie_goal'] ?> Calories/day — <?= ucwords($latestGoal['goal_type']) ?></p>
+<?php else: ?>
+    <p><strong>No calorie goal set yet.</strong></p>
+<?php endif; ?>
+
     <h1>Your Calories &amp; BMI</h1>
 
     <?php if (!empty($message)): ?>
         <p class="message"><?= htmlspecialchars($message) ?></p>
     <?php endif; ?>
+
+    <a href="../Back End/setCalorieGoal.php">Set Calorie Goal</a>
 
     <!-- Calorie Entry Form -->
     <form action="CalorieCounter.php" method="post">

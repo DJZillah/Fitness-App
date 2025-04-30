@@ -8,22 +8,21 @@ if (session_status() === PHP_SESSION_NONE) {
 <head>
     <meta charset="UTF-8">
     <title><?= isset($title) ? htmlspecialchars($title) : 'Fitify' ?></title>
-    <link rel="stylesheet" href="FitifyRulesNew.css">
+    <link rel="stylesheet" href="../Front End/FitifyRulesNew.css">
 </head>
 <body>
 
 <header class="TopofPage">
     <h1 id="Logo">Fitify</h1>
     <nav>
-        <a href="FitHomepage.php">Home</a>
-        <a href="CalorieCounter.php">Nutrition</a>
-        <a href="WorkoutTracker.php">Workouts</a>
-        <a href="log_weight.php">Log Weight</a>
-        <a href="burned_calories.php">Burned Calories</a>
-        <a href="Add_milestone.php">Milestones</a>
-        <a href="MidTermDiscountClub.html">Guidance</a>
-        <a href="calendar.php">Calender</a>
-
+        <a href="../Back End/FitHomepage.php">Home</a>
+         <a href="../Back End/CalorieCounter.php">Nutrition</a>
+         <a href="../Back End/WorkoutTracker.php">Workouts</a>
+         <a href="../Back End/log_weight.php">Log Weight</a>
+         <a href="../Front End/Add_milestone.php">Milestones</a>
+        <a href="../Front End/calendar.php">Calendar</a>
+        <a href="../Back End/setCalorieGoal.php">Set Calorie Goal</a>
+     
         <!-- More dropdown -->
         <div class="dropdown">
             <button class="dropbtn">More ▾</button>
@@ -37,11 +36,11 @@ if (session_status() === PHP_SESSION_NONE) {
             </div>
         </div>
 
-        <!-- Logout button -->
-        <form method="POST" style="display:inline;">
-            <input type="submit" name="logout" value="Logout">
-        </form>
-    </nav>
+                    <!-- Profile button -->
+            <form method="GET" style="display:inline;">
+                <input type="submit" value="Profile" formaction="profile.php">
+            </form>
+        </nav>
 </header>
 
 <?php

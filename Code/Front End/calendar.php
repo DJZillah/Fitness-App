@@ -1,6 +1,6 @@
 <?php
 namespace Fitify;
-include 'MoreDBUtil.php';
+include '../Back End/MoreDBUtil.php';
 session_start();
 if (empty($_SESSION)) header("Location: login.php");
 include 'header.php';

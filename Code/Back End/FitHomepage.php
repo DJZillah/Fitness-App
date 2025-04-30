@@ -65,7 +65,7 @@ if ($result4->num_rows > 0) {
     <h3>📊 Weekly Summary</h3>
     
     <p>
-        <strong><a href="../Back End/CalorieCounter.php">Calorie Intake (Past 7 Days):</a></strong> 
+        <strong><a href="../Back End/CalorieCalendar.php">Calorie Intake (Past 7 Days):</a></strong> 
         <?= $weeklyCalDisplay ?>
     </p>
     
@@ -102,6 +102,8 @@ if ($result4->num_rows > 0) {
             <p><a href="../Back End/WorkoutTracker.php">Track a New Workout</a></p>
             <p><a href="../Back End/CalorieCounter.php">Log Today's Meals</a></p>
             <p><a href="../Front End/view_milestones.php">View Your Milestones</a></p>
+            <p><a href="../Back End/CalorieCalendar.php">View Logged Calories</a></p>
+
         </div>
     </div>
     <?php include_once __DIR__ . '/../Front End/footer.php'; ?>
