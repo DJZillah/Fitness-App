@@ -2,7 +2,7 @@
 session_start();
 include 'header.php';
 
-//connect to the database
+//connect to database
 $servername = "fitify-db.ctq460w22gbq.us-east-2.rds.amazonaws.com";
 $username = "root";
 $password = "fitify123";
@@ -83,22 +83,12 @@ if (isset($sumQuery)) {
 }
 
 $entries = $conn->query("SELECT * FROM burned_calories_log WHERE user_id = $userId AND $filterQuery ORDER BY log_date DESC");
-
-//chart data
-$chartResult = $conn->query("SELECT log_date, calories_burned FROM burned_calories_log WHERE user_id = $userId AND $filterQuery ORDER BY log_date ASC");
-$labels = [];
-$data = [];
-while ($row = $chartResult->fetch_assoc()) {
-    $labels[] = $row['log_date'];
-    $data[] = $row['calories_burned'];
-}
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <title>Burned Calories Tracker</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 <div class="container">
@@ -127,7 +117,7 @@ while ($row = $chartResult->fetch_assoc()) {
     </form>
 
     <div class="message" style="text-align: center;">
-        Filter: 
+        Filter:
         <a href="?filter=all">All</a> |
         <a href="?filter=week">This Week</a> |
         <a href="?filter=month">This Month</a>
@@ -166,32 +156,10 @@ while ($row = $chartResult->fetch_assoc()) {
         </tbody>
     </table>
 
+    <!--Burned calories chart-->
     <h2 class="section-heading">Calories Burned Over Time</h2>
-    <canvas id="caloriesChart" width="600" height="300" class="weight-chart"></canvas>
+    <iframe src="burned_calories_chart.php?filter=<?= urlencode($filter) ?>" width="600" height="300" style="border:none; display:block; margin:auto;"></iframe>
 </div>
-
-<script>
-    const ctx = document.getElementById('caloriesChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: <?= json_encode($labels) ?>,
-            datasets: [{
-                label: 'Calories Burned',
-                data: <?= json_encode($data) ?>,
-                borderColor: 'blue',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.5
-            }]
-        },
-        options: {
-            scales: {
-                y: { beginAtZero: true }
-            }
-        }
-    });
-</script>
 
 <?php include 'footer.php'; ?>
 </body>
