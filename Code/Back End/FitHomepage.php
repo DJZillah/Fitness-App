@@ -4,8 +4,11 @@ include_once __DIR__ . '/MoreDBUtil.php';
 session_start();
 include_once __DIR__ . '/../Front End/header.php';
 
-
 $userId = $_SESSION['user_id'];
+if (empty($_SESSION)) {
+    header("/Fitify/Fitness-App-main/Fitness-App-main/Code/Front%20End/login.php");
+    exit();
+} //if somehow navigate here with no user_id in sesison, back to login
 
 // Weekly Calories
 $weeklyCalSql = "SELECT TotalCal FROM Simple_Cal_Log WHERE LogDate >= DATE_SUB(NOW(), INTERVAL 7 DAY) AND user_id = $userId";

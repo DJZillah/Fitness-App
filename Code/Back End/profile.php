@@ -1,33 +1,26 @@
 <?php
 namespace Fitify;
+ob_start();
 session_start();
 require_once __DIR__ . '/../Back End/MoreDBUtil.php';
 require_once __DIR__ . '/../Front End/header.php';
 require_once __DIR__ . '/../Back End/Badges.php';
 
-$timeout_duration = 600; //10 minutes
-if (isset($_SESSION['LAST_ACTIVITY']) &&
-    (time() - $_SESSION['LAST_ACTIVITY']) > $timeout_duration) 
-    {
-        session_unset();
-        session_destroy();
-        header("Location: login.php"); 
-        exit();
-    } //timeout timer
-
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["logout"])) {
-    session_destroy();
-    header("Location: ../Front End/login.php");
-    exit();
-}
-
 $user_id = $_SESSION['user_id'] ?? null; //userID in the session user for queries 
 $badges = new BadgeTrack($user_id, $conn); //object to track badge progress
 
-if (!$user_id) {
-    header("Location: ../Front End/login.php");
-    exit;
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["logout"])) 
+{
+    session_unset(); // clear $_SESSION
+    session_destroy(); // destroy the session
+    header("Location: /Fitify/Fitness-App-main/Fitness-App-main/Code/Front%20End/login.php");
+    exit();
 }
+if (empty($_SESSION)) 
+{
+    header("Location: /Fitify/Fitness-App-main/Fitness-App-main/Code/Front%20End/login.php");
+    exit();
+} 
 
 // Handle updates
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -42,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute();
 
     // Redirect to prevent form resubmission
-    header("Location: profile.php");
+    header("Location: ../Back End/profile.php");
     exit;
 }
 
@@ -53,21 +46,9 @@ $stmt->execute();
 $result = $stmt->get_result();
 $user = $result->fetch_assoc();
 
-//---Badges---
+$weights = $badges->GetWeight();
 
-$calBadge = false;
-$calBadsql = "SELECT SUM(TotalCal) AS total FROM Simple_Cal_Log WHERE user_id = $user_id";
-$result = mysqli_query($conn, $calBadsql);
-
-/*if ($row = mysqli_fetch_assoc($result)) 
-{
-    $bigTotal = $row['total'];
-}
-
-if ($bigTotal >= 75000) 
-{
-    $calBadge = true;
-} */
+ob_end_flush();
 ?>
 
 <!DOCTYPE html>
@@ -104,14 +85,40 @@ if ($bigTotal >= 75000)
 
             <div class="Badges"> <!-- bit messy & long but it works -->
                 <legend> Badges: </legend>
+
                 <label> Registered your account
                     <img src="default.png"
                     width="32" height="32"
                     style="vertical-align: middle; margin-left: 8px; margin-bottom: 14px;" >
                 </label> <br>
+
                 <?php if ($badges->ConsumeCheck()): ?>
-                    <label> Burned 75,000 Calories
+                    <label> Logged over 75,000 Calories
                     <img src="consume.png"
+                    width="32" height="32"
+                    style="vertical-align: middle; margin-left: 8px; margin-bottom: 14px;">
+                </label> <br>
+                <?php endif; ?>
+
+                <?php if ($badges->BMICheck()): ?>
+                    <label> Healthy BMI 
+                    <img src="normal.png"
+                    width="32" height="32"
+                    style="vertical-align: middle; margin-left: 8px; margin-bottom: 14px;">
+                </label> <br>
+                <?php endif; ?>
+
+                <?php if ($badges->Loss($weights)): //lost voer 20 pounds?>
+                    <label> Lost over 20 pounds 
+                    <img src="Feather.jpg"
+                    width="32" height="32"
+                    style="vertical-align: middle; margin-left: 8px; margin-bottom: 14px;">
+                </label> <br>
+                <?php endif; ?>
+
+                <?php if ($badges->Gain($weights)): //gained over 20 pounds?>
+                    <label> Gained over 20 pounds 
+                    <img src="Bicep.jpg"
                     width="32" height="32"
                     style="vertical-align: middle; margin-left: 8px; margin-bottom: 14px;">
                 </label> <br>
@@ -122,7 +129,7 @@ if ($bigTotal >= 75000)
             <button type="submit">Update Profile</button>
         </form>
 
-        <form method="POST" style="margin-top: 20px;">
+        <form method="POST" style="margin-top: 20px;" action="profile.php">
              <button type="submit" name="logout" class="logout-btn">Logout</button>
         </form>
 
