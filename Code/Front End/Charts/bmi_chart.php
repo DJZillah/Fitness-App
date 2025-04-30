@@ -21,97 +21,151 @@ $conn->close();
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <title>BMI Chart</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.1.0"></script>
     <style>
-        body { margin: 0; }
-        canvas { display: block; max-width: 100%; }
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+        }
+        #chart-container {
+            width: 500px;
+            height: 250px;
+            max-width: 100%;
+        }
+        canvas {
+            width: 500px !important;
+            height: 250px !important;
+            display: block;
+        }
+        .legend {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 1em;
+            flex-wrap: wrap;
+        }
+        .legend span {
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
+        }
+        .color-box {
+            width: 15px;
+            height: 15px;
+            display: inline-block;
+            border: 1px solid #ccc;
+        }
+        .underweight { background-color: orange; }
+        .normal { background-color: green; }
+        .overweight { background-color: yellow; }
+        .obese { background-color: red; }
     </style>
 </head>
 <body>
-<canvas id="bmiChart"></canvas>
-<script>
-const bmiCtx = document.getElementById('bmiChart').getContext('2d');
-new Chart(bmiCtx, {
-    type: 'line',
-    data: {
-        labels: <?= json_encode($bmiDates) ?>,
-        datasets: [{
-            label: 'BMI',
-            data: <?= json_encode($bmiValues) ?>,
-            borderColor: 'blue',
-            borderWidth: 2,
-            fill: false,
-            tension: 0.5,
-            pointBackgroundColor: <?= json_encode(array_map(function($val) {
-                if ($val < 18.5) return 'orange';
-                if ($val < 25) return 'green';
-                if ($val < 30) return 'yellow';
-                return 'red';
-            }, $bmiValues)) ?>
-        }]
-    },
-    options: {
-        plugins: {
-            annotation: {
-                annotations: {
-                    underweight: {
-                        type: 'box',
-                        yMin: 0,
-                        yMax: 18.5,
-                        backgroundColor: 'rgba(255, 165, 0, 0.1)',
-                        label: {
-                            content: 'Underweight',
-                            enabled: true,
-                            position: 'start'
+    <div id="chart-container">
+        <canvas id="bmiChart" width="500" height="250"></canvas>
+    </div>
+
+    <div class="legend">
+        <span><div class="color-box underweight"></div>Underweight</span>
+        <span><div class="color-box normal"></div>Normal</span>
+        <span><div class="color-box overweight"></div>Overweight</span>
+        <span><div class="color-box obese"></div>Obese</span>
+    </div>
+
+    <script>
+        const bmiCtx = document.getElementById('bmiChart').getContext('2d');
+        new Chart(bmiCtx, {
+            type: 'line',
+            data: {
+                labels: <?= json_encode($bmiDates) ?>,
+                datasets: [{
+                    label: 'BMI',
+                    data: <?= json_encode($bmiValues) ?>,
+                    borderColor: 'blue',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.5,
+                    pointBackgroundColor: <?= json_encode(array_map(function($val) {
+                        if ($val < 18.5) return 'orange';
+                        if ($val < 25) return 'green';
+                        if ($val < 30) return 'yellow';
+                        return 'red';
+                    }, $bmiValues)) ?>
+                }]
+            },
+            options: {
+                responsive: false,
+                maintainAspectRatio: false,
+                plugins: {
+                    annotation: {
+                        annotations: {
+                            underweight: {
+                                type: 'box',
+                                yMin: 0,
+                                yMax: 18.5,
+                                backgroundColor: 'rgba(255, 165, 0, 0.1)',
+                                label: {
+                                    content: 'Underweight',
+                                    enabled: true,
+                                    position: 'start'
+                                }
+                            },
+                            normal: {
+                                type: 'box',
+                                yMin: 18.5,
+                                yMax: 24.9,
+                                backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                                label: {
+                                    content: 'Normal weight',
+                                    enabled: true,
+                                    position: 'start'
+                                }
+                            },
+                            overweight: {
+                                type: 'box',
+                                yMin: 25,
+                                yMax: 29.9,
+                                backgroundColor: 'rgba(255, 255, 0, 0.1)',
+                                label: {
+                                    content: 'Overweight',
+                                    enabled: true,
+                                    position: 'start'
+                                }
+                            },
+                            obese: {
+                                type: 'box',
+                                yMin: 30,
+                                yMax: 50,
+                                backgroundColor: 'rgba(255, 0, 0, 0.1)',
+                                label: {
+                                    content: 'Obese',
+                                    enabled: true,
+                                    position: 'start'
+                                }
+                            }
                         }
-                    },
-                    normal: {
-                        type: 'box',
-                        yMin: 18.5,
-                        yMax: 24.9,
-                        backgroundColor: 'rgba(0, 255, 0, 0.1)',
-                        label: {
-                            content: 'Normal weight',
-                            enabled: true,
-                            position: 'start'
-                        }
-                    },
-                    overweight: {
-                        type: 'box',
-                        yMin: 25,
-                        yMax: 29.9,
-                        backgroundColor: 'rgba(255, 255, 0, 0.1)',
-                        label: {
-                            content: 'Overweight',
-                            enabled: true,
-                            position: 'start'
-                        }
-                    },
-                    obese: {
-                        type: 'box',
-                        yMin: 30,
-                        yMax: 50,
-                        backgroundColor: 'rgba(255, 0, 0, 0.1)',
-                        label: {
-                            content: 'Obese',
-                            enabled: true,
-                            position: 'start'
-                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        suggestedMax: 45
                     }
                 }
             }
-        },
-        scales: {
-            y: {
-                beginAtZero: false,
-                suggestedMax: 40
-            }
-        }
-    }
-});
-</script>
+        });
+    </script>
 </body>
 </html>
