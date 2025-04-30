@@ -1,14 +1,12 @@
 <?php
 namespace Fitify;
-include_once __DIR__ . '/MoreDBUtil.php';
+include_once 'MoreDBUtil.php';
 session_start();
-include_once __DIR__ . '/../Front End/header.php';
+include 'header.php';
 
-if (empty($_SESSION)) 
-{
+if (empty($_SESSION)) {
     header("Location: login.php");
-} 
-$message = '';
+}
 
 // Function to calculate BMI and category (Imperial)
 function calculateBMI($height_in, $weight_lbs) {
@@ -28,14 +26,13 @@ function calculateBMI($height_in, $weight_lbs) {
     return [$bmi, $category];
 }
 
-if (isset($_POST['calc'])) // if calculate BMI submitted
-{
+if (isset($_POST['calc'])) { // if calculate BMI submitted
     $feet = intval($_POST["feet"]);
     $inches = intval($_POST["inches"]);
     $weight_lbs = floatval($_POST["weight"]);
     $name = $_SESSION['user']; // username
-    $user_id = $_SESSION['user_id']; 
-
+    $user_id = $_SESSION['user_id'];
+    
     // Convert height to total inches
     $height_in = ($feet * 12) + $inches;
 
@@ -46,110 +43,106 @@ if (isset($_POST['calc'])) // if calculate BMI submitted
     $stmt->bind_param("isddds", $user_id, $name, $height_in, $weight_lbs, $bmi, $category);
 
     if ($stmt->execute()) {
-        $message = "Your BMI is " . number_format($bmi, 2) . ", which makes you " . ($category) . "."; 
+        $_SESSION['bmi_message'] = "Your BMI is " . number_format($bmi, 2) . ", which makes you " . $category . ".";
     } else {
-        echo "<p>Error: " . $stmt->error . "</p>";
-        $message = "Error logging BMI.";
+        $_SESSION['bmi_message'] = "Error logging BMI.";
     }
     $stmt->close();
-    $conn->close();
+
+    // Prevent resubmission on refresh
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
 }
- //idk im not gonna touch this 
-//below starts calorie intake tracker logic
+
+// Calories logic starts here
 $totalCal = 0;
 $logDate = date('Y-m-d H:i:s');
 
 $fields = ['breakfast', 'lunch', 'dinner', 'misc']; //array of all text input ids
+$validInputs = array_fill_keys($fields, false);     //associative array where each value is given a key of false
 
-$validInputs = array_fill_keys($fields, false); //associative array where each value is given a key of false
-
-if (isset($_POST['add'])) 
-{ //when enter calories button is clicked
-    foreach ($fields as $field) 
-    { //iterate through $fields
-        if (isset($_POST[$field]) && is_numeric($_POST[$field])) 
-        {
+if (isset($_POST['add'])) { //when enter calories button is clicked
+    foreach ($fields as $field) { //iterate through $fields
+        if (isset($_POST[$field]) && is_numeric($_POST[$field])) {
             $validInputs[$field] = true;
-        } 
-        else 
-        {
+        } else {
             $message = "Please ensure only numbers are entered.";
         }
     }
-    if ($validInputs) 
-    {
-        foreach ($fields as $field) { //fetch the associated entered values by the user and get the sum
-            if (isset($_POST[$field]) && is_numeric($_POST[$field])) 
-            {
+
+    if ($validInputs) {
+        foreach ($fields as $field) { // Sum the valid input values
+            if (isset($_POST[$field]) && is_numeric($_POST[$field])) {
                 $totalCal += $_POST[$field];
             }
         }
+
+        //Simple_Cal_Log has auto-increment primary key "LogID"
         $sql = "INSERT INTO Simple_Cal_Log (TotalCal, LogDate, user_id) 
-        VALUES ($totalCal, '$logDate', " . $_SESSION['user_id'] . ")"; //for some reason user_id wants to be concatenated
-         //Simple_Cal_Log has auto-increment primary key "LogID"
+                VALUES ($totalCal, '$logDate', " . $_SESSION['user_id'] . ")"; // user_id is concatenated
 
         if ($conn->query($sql) === TRUE) {
-            $message = "Total calories: " . $totalCal; //maybe prevent the user 
-        } else {
-            echo "Error: " . $sql . "<br>" . $conn->error;
+            $message = "Total calories: " . $totalCal;
         }
-        $conn->close();
     }
-} //end of if add button scope
-?> 
+}
+?>
 
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Workout Tracker</title>
+    <title>Calories & BMI</title>
 </head>
 <body>
 <div class="form-container">
     <h1>Your Calories &amp; BMI</h1>
-    <?php if ($message): ?>
-      <p class="message"><?= htmlspecialchars($message) ?></p>
+
+    <?php if (!empty($message)): ?>
+        <p class="message"><?= htmlspecialchars($message) ?></p>
     <?php endif; ?>
 
     <!-- Calorie Entry Form -->
     <form action="CalorieCounter.php" method="post">
-      <fieldset>
-        <legend>Today's Calories</legend>
-        <?php foreach (['breakfast','lunch','dinner','misc'] as $meal): ?>
-          <label for="<?= $meal ?>">
-            <?= ucfirst($meal) ?>:
-            <input
-              type="number"
-              id="<?= $meal ?>"
-              name="<?= $meal ?>"
-              min="0"
-              step="1"
-              style="width:4em;"
-            />
-          </label>
-        <?php endforeach; ?>
-        <input type="submit" name="add" value="Add Calories">
-      </fieldset>
+        <fieldset>
+            <legend>Today's Calories</legend>
+            <?php foreach (['breakfast','lunch','dinner','misc'] as $meal): ?>
+                <label for="<?= $meal ?>"><?= ucfirst($meal) ?>:
+                    <input type="number" id="<?= $meal ?>" name="<?= $meal ?>" min="0" step="1" style="width:4em;">
+                </label>
+            <?php endforeach; ?>
+            <input type="submit" name="add" value="Add Calories">
+        </fieldset>
     </form>
-    <hr>
-    <!-- BMI Calculator -->
-    <form method="POST" id="BMI">
-      <fieldset>
-        <legend>BMI Calculator</legend>
 
-        <label for="feet">Height:</label>
-        <div style="display:flex; gap:0.5em; margin-bottom:1em;">
-          <input type="number" name="feet" id="feet" required placeholder="ft" min="0">
-          <input type="number" name="inches" required placeholder="in" min="0" max="11">
-        </div>
-        <label for="weight">Weight (lbs):</label>
-        <input type="number" name="weight" id="weight" required placeholder="e.g. 150">
-        <input type="submit" name="calc" value="Calculate BMI">
-      </fieldset>
+    <hr>
+
+    <!-- BMI Calculator -->
+    <form method="POST">
+        <fieldset>
+            <legend>BMI Calculator</legend>
+            <label for="feet">Height:</label>
+            <div style="display:flex; gap:0.5em; margin-bottom:1em;">
+                <input type="number" name="feet" required placeholder="ft" min="0">
+                <input type="number" name="inches" required placeholder="in" min="0" max="11">
+            </div>
+            <label for="weight">Weight (lbs):</label>
+            <input type="number" name="weight" required placeholder="e.g. 150">
+            <input type="submit" name="calc" value="Calculate BMI">
+        </fieldset>
     </form>
+
+    <?php if (!empty($_SESSION['bmi_message'])): ?>
+        <p class="message"><?= htmlspecialchars($_SESSION['bmi_message']) ?></p>
+        <?php unset($_SESSION['bmi_message']); ?>
+    <?php endif; ?>
+
+    <!--BMI chart-->
+    <h2 class="section-heading">BMI Progress Chart</h2>
+    <iframe src="bmi_chart.php" width="100%" height="360" style="border:none;"></iframe>
+
     <a href="FitHomepage.php" class="back-button">Back to Dashboard</a>
-  </div>
-    </body>
+</div>
+<?php include 'footer.php'; ?>
+</body>
 </html>
-<?php include_once __DIR__ . '/../Front End/footer.php'; ?>
