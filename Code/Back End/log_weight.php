@@ -1,18 +1,14 @@
 <?php
 session_start();
-include_once __DIR__ . '/../Front End/header.php';
-include_once __DIR__ . '/../Back End/MoreDBUtil.php';
+include 'header.php';
 
 // Connect to DB
-/*$servername = "fitify-db.ctq460w22gbq.us-east-2.rds.amazonaws.com";
+$servername = "fitify-db.ctq460w22gbq.us-east-2.rds.amazonaws.com";
 $username = "root";
 $password = "fitify123";
 $database = "fitifyDB";
-
 $conn = new mysqli($servername, $username, $password, $database);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-} */
+if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
 
 $userId = $_SESSION['user_id'];
 $message = "";
@@ -21,18 +17,14 @@ $message = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $weight = $_POST["weight"];
     if (is_numeric($weight) && $weight > 0) {
-        if (isset($_POST["edit_id"])) {
-            $editId = intval($_POST["edit_id"]);
-            $stmt = $conn->prepare("UPDATE weight_log SET weight = ? WHERE log_id = ? AND user_id = ?");
-            $stmt->bind_param("dii", $weight, $editId, $userId);
-        } else {
-            $stmt = $conn->prepare("INSERT INTO weight_log (weight, user_id) VALUES (?, ?)");
-            $stmt->bind_param("di", $weight, $userId);
-        }
+        $stmt = $conn->prepare("INSERT INTO weight_log (weight, user_id) VALUES (?, ?)");
+        $stmt->bind_param("di", $weight, $userId);
         $stmt->execute();
         $stmt->close();
-        header("Location: " . $_SERVER['PHP_SELF'] . "?msg=Saved");
+        header("Location: " . $_SERVER['PHP_SELF'] . "?msg=Entry saved.");
         exit();
+    } else {
+        $message = "Please enter a valid weight.";
     }
 }
 
@@ -40,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 if (isset($_GET['delete'])) {
     $deleteId = intval($_GET['delete']);
     $conn->query("DELETE FROM weight_log WHERE log_id = $deleteId AND user_id = $userId");
-    header("Location: " . $_SERVER['PHP_SELF'] . "?msg=Deleted");
+    header("Location: " . $_SERVER['PHP_SELF'] . "?msg=Entry deleted.");
     exit();
 }
 
@@ -48,17 +40,7 @@ if (isset($_GET['msg'])) {
     $message = htmlspecialchars($_GET['msg']);
 }
 
-// Fetch record to edit
-$editData = null;
-if (isset($_GET['edit'])) {
-    $editId = intval($_GET['edit']);
-    $editResult = $conn->query("SELECT * FROM weight_log WHERE log_id = $editId AND user_id = $userId");
-    if ($editResult->num_rows > 0) {
-        $editData = $editResult->fetch_assoc();
-    }
-}
-
-// Filter
+// Filter 
 $filter = $_GET['filter'] ?? 'all';
 $filterQuery = "1=1";
 $summaryMessage = "";
@@ -94,7 +76,7 @@ if ($filter !== 'all') {
 }
 
 // Fetch logs
-$result = $conn->query("SELECT * FROM weight_log WHERE user_id = $userId AND $filterQuery ORDER BY created_at DESC");
+$entries = $conn->query("SELECT * FROM weight_log WHERE user_id = $userId AND $filterQuery ORDER BY created_at DESC");
 
 // Chart data
 $chartQuery = $conn->query("SELECT weight, created_at FROM weight_log WHERE user_id = $userId AND $filterQuery ORDER BY created_at ASC");
@@ -113,27 +95,19 @@ while ($row = $chartQuery->fetch_assoc()) {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-
 <div class="container">
-    <h1 class="page-heading">Weight Tracker Poob </h1>
+    <h1 class="page-heading">Weight Tracker</h1>
 
-    <?php if (!empty($message)): ?>
+    <?php if ($message): ?>
         <div class="message"><?= $message ?></div>
     <?php endif; ?>
 
     <form method="POST">
         <fieldset class="weight-form">
-            <legend><?= $editData ? "Edit Entry" : "New Entry" ?></legend>
+            <legend>New Entry</legend>
             <label for="weight">Weight (lbs):</label>
-            <input type="number" step="0.1" name="weight" required value="<?= $editData['weight'] ?? '' ?>">
-
-            <?php if ($editData): ?>
-                <input type="hidden" name="edit_id" value="<?= $editData['log_id'] ?>">
-                <input type="submit" value="Update Weight">
-                <a class="cancel-link" href="<?= $_SERVER['PHP_SELF'] ?>">Cancel</a>
-            <?php else: ?>
-                <input type="submit" value="Log Weight">
-            <?php endif; ?>
+            <input type="number" step="0.1" name="weight" required>
+            <input type="submit" value="Log Weight">
         </fieldset>
     </form>
 
@@ -144,29 +118,33 @@ while ($row = $chartQuery->fetch_assoc()) {
         <a href="?filter=month">This Month</a>
     </div>
 
-    <?php if (!empty($summaryMessage)): ?>
+    <?php if ($summaryMessage): ?>
         <div class="message" style="text-align: center;"><?= $summaryMessage ?></div>
     <?php endif; ?>
 
     <h2 class="section-heading">Weight History</h2>
-    <table class="weight-table">
-        <tr>
-            <th>Log ID</th>
-            <th>Weight</th>
-            <th>Date</th>
-            <th>Actions</th>
-        </tr>
-        <?php while ($row = $result->fetch_assoc()): ?>
+    <table>
+        <thead>
             <tr>
-                <td><?= $row['log_id'] ?></td>
-                <td><?= $row['weight'] ?> lbs</td>
-                <td><?= $row['created_at'] ?></td>
-                <td>
-                    <a href="?edit=<?= $row['log_id'] ?>">Edit</a> |
-                    <a href="?delete=<?= $row['log_id'] ?>" onclick="return confirm('Delete this entry?')">Delete</a>
-                </td>
+                <th>Date</th>
+                <th>Weight</th>
+                <th>Actions</th>
             </tr>
-        <?php endwhile; ?>
+        </thead>
+        <tbody>
+            <?php while ($row = $entries->fetch_assoc()): ?>
+                <tr>
+                    <td><?= $row['created_at'] ?></td>
+                    <td><?= $row['weight'] ?> lbs</td>
+                    <td>
+                        <form method="GET" style="display:inline;">
+                            <input type="hidden" name="delete" value="<?= $row['log_id'] ?>">
+                            <button type="submit" onclick="return confirm('Delete this entry?')">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            <?php endwhile; ?>
+        </tbody>
     </table>
 
     <h2 class="section-heading">Weight Progress Chart</h2>
@@ -175,14 +153,14 @@ while ($row = $chartQuery->fetch_assoc()) {
 
 <script>
     const ctx = document.getElementById('weightChart').getContext('2d');
-    const weightChart = new Chart(ctx, {
+    new Chart(ctx, {
         type: 'line',
         data: {
             labels: <?= json_encode($dates) ?>,
             datasets: [{
                 label: 'Weight (lbs)',
                 data: <?= json_encode($weights) ?>,
-                borderColor: 'red',
+                borderColor: 'blue',
                 borderWidth: 2,
                 fill: true,
                 tension: 0.5
@@ -190,17 +168,12 @@ while ($row = $chartQuery->fetch_assoc()) {
         },
         options: {
             scales: {
-                y: {
-                    beginAtZero: false
-                }
+                y: { beginAtZero: false }
             }
         }
     });
 </script>
 
-<?php
-$conn->close();
-include_once __DIR__ . '/../Front End/footer.php';
-?>
+<?php include 'footer.php'; ?>
 </body>
 </html>
