@@ -40,7 +40,7 @@ if (isset($_GET['msg'])) {
     $message = htmlspecialchars($_GET['msg']);
 }
 
-// Filter 
+// Filter
 $filter = $_GET['filter'] ?? 'all';
 $filterQuery = "1=1";
 $summaryMessage = "";
@@ -77,22 +77,12 @@ if ($filter !== 'all') {
 
 // Fetch logs
 $entries = $conn->query("SELECT * FROM weight_log WHERE user_id = $userId AND $filterQuery ORDER BY created_at DESC");
-
-// Chart data
-$chartQuery = $conn->query("SELECT weight, created_at FROM weight_log WHERE user_id = $userId AND $filterQuery ORDER BY created_at ASC");
-$weights = [];
-$dates = [];
-while ($row = $chartQuery->fetch_assoc()) {
-    $weights[] = $row['weight'];
-    $dates[] = $row['created_at'];
-}
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <title>Weight Tracker</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 <div class="container">
@@ -147,32 +137,10 @@ while ($row = $chartQuery->fetch_assoc()) {
         </tbody>
     </table>
 
+    <!--Weight Chart-->
     <h2 class="section-heading">Weight Progress Chart</h2>
-    <canvas id="weightChart" width="600" height="300" class="weight-chart"></canvas>
+    <iframe src="weight_chart.php?filter=<?= urlencode($filter) ?>" width="100%" height="360" style="border:none;"></iframe>
 </div>
-
-<script>
-    const ctx = document.getElementById('weightChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: <?= json_encode($dates) ?>,
-            datasets: [{
-                label: 'Weight (lbs)',
-                data: <?= json_encode($weights) ?>,
-                borderColor: 'blue',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.5
-            }]
-        },
-        options: {
-            scales: {
-                y: { beginAtZero: false }
-            }
-        }
-    });
-</script>
 
 <?php include 'footer.php'; ?>
 </body>
