@@ -19,9 +19,11 @@ if (session_status() === PHP_SESSION_NONE) {
         <a href="CalorieCounter.php">Nutrition</a>
         <a href="WorkoutTracker.php">Workouts</a>
         <a href="log_weight.php">Log Weight</a>
+        <a href="burned_calories.php">Burned Calories</a>
         <a href="Add_milestone.php">Milestones</a>
         <a href="MidTermDiscountClub.html">Guidance</a>
         <a href="calendar.php">Calender</a>
+
         <!-- More dropdown -->
         <div class="dropdown">
             <button class="dropbtn">More ▾</button>
