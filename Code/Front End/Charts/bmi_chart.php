@@ -1,22 +1,26 @@
 <?php
 namespace Fitify;
-include_once 'MoreDBUtil.php';
+include_once dirname(__DIR__, 2) . '/Back End/MoreDBUtil.php';
 session_start();
 
 if (empty($_SESSION)) {
-    header("Location: login.php");
+    header("Location: ../login.php");
     exit();
 }
 
 $conn = new \mysqli("fitify-db.ctq460w22gbq.us-east-2.rds.amazonaws.com", "root", "fitify123", "fitifyDB");
+if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
+
 $userId = $_SESSION['user_id'];
 $bmiData = $conn->query("SELECT bmi, created_at FROM bmi_records WHERE user_id = $userId ORDER BY created_at ASC");
 $bmiValues = [];
 $bmiDates = [];
+
 while ($row = $bmiData->fetch_assoc()) {
     $bmiValues[] = round($row['bmi'], 2);
     $bmiDates[] = $row['created_at'];
 }
+
 $conn->close();
 ?>
 
@@ -26,7 +30,8 @@ $conn->close();
     <meta charset="UTF-8">
     <title>BMI Chart</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.1.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
+    <link rel="stylesheet" href="../FitifyRules.css">
     <style>
         body {
             margin: 0;
@@ -39,14 +44,9 @@ $conn->close();
             font-family: Arial, sans-serif;
         }
         #chart-container {
-            width: 500px;
-            height: 250px;
-            max-width: 100%;
-        }
-        canvas {
-            width: 500px !important;
-            height: 250px !important;
-            display: block;
+            width: 90%;
+            max-width: 700px;
+            height: 400px;
         }
         .legend {
             margin-top: 10px;
@@ -74,7 +74,7 @@ $conn->close();
 </head>
 <body>
     <div id="chart-container">
-        <canvas id="bmiChart" width="500" height="250"></canvas>
+        <canvas id="bmiChart"></canvas>
     </div>
 
     <div class="legend">
@@ -96,7 +96,7 @@ $conn->close();
                     borderColor: 'blue',
                     borderWidth: 2,
                     fill: false,
-                    tension: 0.5,
+                    tension: 0.3,
                     pointBackgroundColor: <?= json_encode(array_map(function($val) {
                         if ($val < 18.5) return 'orange';
                         if ($val < 25) return 'green';
@@ -106,7 +106,7 @@ $conn->close();
                 }]
             },
             options: {
-                responsive: false,
+                responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
                     annotation: {
@@ -116,52 +116,46 @@ $conn->close();
                                 yMin: 0,
                                 yMax: 18.5,
                                 backgroundColor: 'rgba(255, 165, 0, 0.1)',
-                                label: {
-                                    content: 'Underweight',
-                                    enabled: true,
-                                    position: 'start'
-                                }
+                                borderWidth: 0
                             },
                             normal: {
                                 type: 'box',
                                 yMin: 18.5,
                                 yMax: 24.9,
                                 backgroundColor: 'rgba(0, 255, 0, 0.1)',
-                                label: {
-                                    content: 'Normal weight',
-                                    enabled: true,
-                                    position: 'start'
-                                }
+                                borderWidth: 0
                             },
                             overweight: {
                                 type: 'box',
                                 yMin: 25,
                                 yMax: 29.9,
                                 backgroundColor: 'rgba(255, 255, 0, 0.1)',
-                                label: {
-                                    content: 'Overweight',
-                                    enabled: true,
-                                    position: 'start'
-                                }
+                                borderWidth: 0
                             },
                             obese: {
                                 type: 'box',
                                 yMin: 30,
                                 yMax: 50,
                                 backgroundColor: 'rgba(255, 0, 0, 0.1)',
-                                label: {
-                                    content: 'Obese',
-                                    enabled: true,
-                                    position: 'start'
-                                }
+                                borderWidth: 0
                             }
                         }
                     }
                 },
                 scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    },
                     y: {
-                        beginAtZero: false,
-                        suggestedMax: 45
+                        title: {
+                            display: true,
+                            text: 'BMI'
+                        },
+                        min: 10,
+                        max: 50
                     }
                 }
             }
