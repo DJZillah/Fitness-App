@@ -1,12 +1,17 @@
 <?php
 namespace Fitify;
-include_once 'MoreDBUtil.php';
+include_once dirname(__DIR__) . '/Back End/MoreDBUtil.php';
 session_start();
-include 'header.php';
+include_once dirname(__DIR__) . '/Front End/header.php';
 
 if (empty($_SESSION)) {
-    header("Location: login.php");
+    header("Location: ../login.php");
+    exit();
 }
+
+// Database Connection
+$conn = new \mysqli("fitify-db.ctq460w22gbq.us-east-2.rds.amazonaws.com", "root", "fitify123", "fitifyDB");
+if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
 
 // Function to calculate BMI and category (Imperial)
 function calculateBMI($height_in, $weight_lbs) {
@@ -26,11 +31,14 @@ function calculateBMI($height_in, $weight_lbs) {
     return [$bmi, $category];
 }
 
-if (isset($_POST['calc'])) { // if calculate BMI submitted
+$message = "";
+
+// Handle BMI Calculation
+if (isset($_POST['calc'])) {
     $feet = intval($_POST["feet"]);
     $inches = intval($_POST["inches"]);
     $weight_lbs = floatval($_POST["weight"]);
-    $name = $_SESSION['user']; // username
+    $name = $_SESSION['user'];
     $user_id = $_SESSION['user_id'];
     
     // Convert height to total inches
@@ -54,15 +62,14 @@ if (isset($_POST['calc'])) { // if calculate BMI submitted
     exit();
 }
 
-// Calories logic starts here
+// Calories Logic
 $totalCal = 0;
 $logDate = date('Y-m-d H:i:s');
+$fields = ['breakfast', 'lunch', 'dinner', 'misc'];
+$validInputs = array_fill_keys($fields, false);
 
-$fields = ['breakfast', 'lunch', 'dinner', 'misc']; //array of all text input ids
-$validInputs = array_fill_keys($fields, false);     //associative array where each value is given a key of false
-
-if (isset($_POST['add'])) { //when enter calories button is clicked
-    foreach ($fields as $field) { //iterate through $fields
+if (isset($_POST['add'])) {
+    foreach ($fields as $field) {
         if (isset($_POST[$field]) && is_numeric($_POST[$field])) {
             $validInputs[$field] = true;
         } else {
@@ -70,22 +77,34 @@ if (isset($_POST['add'])) { //when enter calories button is clicked
         }
     }
 
-    if ($validInputs) {
-        foreach ($fields as $field) { // Sum the valid input values
+    if (array_filter($validInputs)) {
+        foreach ($fields as $field) {
             if (isset($_POST[$field]) && is_numeric($_POST[$field])) {
                 $totalCal += $_POST[$field];
             }
         }
 
-        //Simple_Cal_Log has auto-increment primary key "LogID"
-        $sql = "INSERT INTO Simple_Cal_Log (TotalCal, LogDate, user_id) 
-                VALUES ($totalCal, '$logDate', " . $_SESSION['user_id'] . ")"; // user_id is concatenated
-
-        if ($conn->query($sql) === TRUE) {
+        // Insert calories log
+        $sql = "INSERT INTO Simple_Cal_Log (TotalCal, LogDate, user_id) VALUES (?, ?, ?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("isi", $totalCal, $logDate, $_SESSION['user_id']);
+        
+        if ($stmt->execute()) {
             $message = "Total calories: " . $totalCal;
         }
+
+        $stmt->close();
     }
 }
+
+// Fetch the latest calorie goal
+$user_id = $_SESSION['user_id'];
+$stmt = $conn->prepare("SELECT calorie_goal, goal_type FROM fitness_goals WHERE user_id = ? ORDER BY start_date DESC LIMIT 1");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$latestGoal = $result->fetch_assoc();
+$stmt->close();
 ?>
 
 <!DOCTYPE html>
@@ -93,19 +112,9 @@ if (isset($_POST['add'])) { //when enter calories button is clicked
 <head>
     <meta charset="UTF-8">
     <title>Calories & BMI</title>
+    <link rel="stylesheet" href="../Front End/FitifyRules.css">
 </head>
 <body>
-
-<?php
-// Fetch the latest calorie goal
-$user_id = $_SESSION['user_id'];
-
-$stmt = $conn->prepare("SELECT calorie_goal, goal_type FROM fitness_goals WHERE user_id = ? ORDER BY start_date DESC LIMIT 1");
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$result = $stmt->get_result();
-$latestGoal = $result->fetch_assoc();
-?>
 
 <div class="form-container">
 
@@ -115,55 +124,56 @@ $latestGoal = $result->fetch_assoc();
     <p><strong>No calorie goal set yet.</strong></p>
 <?php endif; ?>
 
-    <h1>Your Calories &amp; BMI</h1>
+<h1>Your Calories &amp; BMI</h1>
 
-    <?php if (!empty($message)): ?>
-        <p class="message"><?= htmlspecialchars($message) ?></p>
-    <?php endif; ?>
+<?php if (!empty($message)): ?>
+    <p class="message"><?= htmlspecialchars($message) ?></p>
+<?php endif; ?>
 
-    <a href="../Back End/setCalorieGoal.php">Set Calorie Goal</a>
+<a href="../Back End/setCalorieGoal.php">Set Calorie Goal</a>
 
-    <!-- Calorie Entry Form -->
-    <form action="CalorieCounter.php" method="post">
-        <fieldset>
-            <legend>Today's Calories</legend>
-            <?php foreach (['breakfast','lunch','dinner','misc'] as $meal): ?>
-                <label for="<?= $meal ?>"><?= ucfirst($meal) ?>:
-                    <input type="number" id="<?= $meal ?>" name="<?= $meal ?>" min="0" step="1" style="width:4em;">
-                </label>
-            <?php endforeach; ?>
-            <input type="submit" name="add" value="Add Calories">
-        </fieldset>
-    </form>
+<!-- Calorie Entry Form -->
+<form action="CalorieCounter.php" method="post">
+    <fieldset>
+        <legend>Today's Calories</legend>
+        <?php foreach (['breakfast','lunch','dinner','misc'] as $meal): ?>
+            <label for="<?= $meal ?>"><?= ucfirst($meal) ?>:
+                <input type="number" id="<?= $meal ?>" name="<?= $meal ?>" min="0" step="1" style="width:4em;">
+            </label>
+        <?php endforeach; ?>
+        <input type="submit" name="add" value="Add Calories">
+    </fieldset>
+</form>
 
-    <hr>
+<hr>
 
-    <!-- BMI Calculator -->
-    <form method="POST">
-        <fieldset>
-            <legend>BMI Calculator</legend>
-            <label for="feet">Height:</label>
-            <div style="display:flex; gap:0.5em; margin-bottom:1em;">
-                <input type="number" name="feet" required placeholder="ft" min="0">
-                <input type="number" name="inches" required placeholder="in" min="0" max="11">
-            </div>
-            <label for="weight">Weight (lbs):</label>
-            <input type="number" name="weight" required placeholder="e.g. 150">
-            <input type="submit" name="calc" value="Calculate BMI">
-        </fieldset>
-    </form>
+<!-- BMI Calculator -->
+<form method="POST">
+    <fieldset>
+        <legend>BMI Calculator</legend>
+        <label for="feet">Height:</label>
+        <div style="display:flex; gap:0.5em; margin-bottom:1em;">
+            <input type="number" name="feet" required placeholder="ft" min="0">
+            <input type="number" name="inches" required placeholder="in" min="0" max="11">
+        </div>
+        <label for="weight">Weight (lbs):</label>
+        <input type="number" name="weight" required placeholder="e.g. 150">
+        <input type="submit" name="calc" value="Calculate BMI">
+    </fieldset>
+</form>
 
-    <?php if (!empty($_SESSION['bmi_message'])): ?>
-        <p class="message"><?= htmlspecialchars($_SESSION['bmi_message']) ?></p>
-        <?php unset($_SESSION['bmi_message']); ?>
-    <?php endif; ?>
+<?php if (!empty($_SESSION['bmi_message'])): ?>
+    <p class="message"><?= htmlspecialchars($_SESSION['bmi_message']) ?></p>
+    <?php unset($_SESSION['bmi_message']); ?>
+<?php endif; ?>
 
-    <!--BMI chart-->
-    <h2 class="section-heading">BMI Progress Chart</h2>
-    <iframe src="bmi_chart.php" width="100%" height="360" style="border:none;"></iframe>
+<!-- BMI Chart -->
+<h2 class="section-heading">BMI Progress Chart</h2>
+<iframe src="../Front End/Charts/bmi_chart.php" width="100%" height="360" style="border:none;"></iframe>
 
-    <a href="FitHomepage.php" class="back-button">Back to Dashboard</a>
+<a href="../Front End/FitHomepage.php" class="back-button">Back to Dashboard</a>
 </div>
-<?php include 'footer.php'; ?>
+
+<?php include_once dirname(__DIR__) . '/Front End/footer.php'; ?>
 </body>
 </html>
