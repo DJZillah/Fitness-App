@@ -1,6 +1,7 @@
 <?php
 session_start();
-include 'header.php';
+
+include_once dirname(__DIR__) . '/Front End/header.php';
 
 // Connect to DB
 $servername = "fitify-db.ctq460w22gbq.us-east-2.rds.amazonaws.com";
@@ -83,6 +84,7 @@ $entries = $conn->query("SELECT * FROM weight_log WHERE user_id = $userId AND $f
 <html lang="en">
 <head>
     <title>Weight Tracker</title>
+    <link rel="stylesheet" href="../Front End/FitifyRules.css">
 </head>
 <body>
 <div class="container">
@@ -137,11 +139,11 @@ $entries = $conn->query("SELECT * FROM weight_log WHERE user_id = $userId AND $f
         </tbody>
     </table>
 
-    <!--Weight Chart-->
+    <!-- Weight Chart -->
     <h2 class="section-heading">Weight Progress Chart</h2>
-    <iframe src="weight_chart.php?filter=<?= urlencode($filter) ?>" width="100%" height="360" style="border:none;"></iframe>
+    <iframe src="../Front End/Charts/weight_chart.php?filter=<?= urlencode($filter) ?>" width="100%" height="360" style="border:none;"></iframe>
 </div>
 
-<?php include 'footer.php'; ?>
+<?php include_once dirname(__DIR__) . '/Front End/footer.php'; ?>
 </body>
 </html>
