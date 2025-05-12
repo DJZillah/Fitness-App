@@ -1,8 +1,9 @@
 <?php
 session_start();
-include 'header.php';
 
-//connect to database
+include_once dirname(__DIR__) . '/Front End/header.php';
+
+// Connect to DB
 $servername = "fitify-db.ctq460w22gbq.us-east-2.rds.amazonaws.com";
 $username = "root";
 $password = "fitify123";
@@ -13,7 +14,7 @@ if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
 $userId = $_SESSION['user_id'];
 $message = "";
 
-//MET values for different activities
+// MET values for different activities
 $activityMETs = [
     "Running" => 9.8,
     "Walking" => 3.5,
@@ -23,18 +24,18 @@ $activityMETs = [
     "Weightlifting" => 6.0
 ];
 
-//handle form submission
+// Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $activity = $_POST["activity_name"];
     $duration = intval($_POST["duration_minutes"]);
     $met = $activityMETs[$activity] ?? 0;
 
-    //get users weight from weight_log
+    // Get user's weight from weight_log
     $weightResult = $conn->query("SELECT weight FROM weight_log WHERE user_id = $userId ORDER BY created_at DESC LIMIT 1");
     $userWeight = ($weightResult && $weightResult->num_rows > 0) ? floatval($weightResult->fetch_assoc()['weight']) : 0;
 
     if ($duration > 0 && $met > 0 && $userWeight > 0) {
-        //calorie formula
+        // Calorie formula
         $weightKg = $userWeight * 0.453592;
         $calories = round(($met * 3.5 * $weightKg * $duration) / 200);
 
@@ -49,7 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-//handle delete
+// Handle delete
 if (isset($_GET['delete'])) {
     $deleteId = intval($_GET['delete']);
     $conn->query("DELETE FROM burned_calories_log WHERE log_id = $deleteId AND user_id = $userId");
@@ -61,7 +62,7 @@ if (isset($_GET['msg'])) {
     $message = htmlspecialchars($_GET['msg']);
 }
 
-//filter
+// Filter
 $filter = $_GET['filter'] ?? 'all';
 $filterQuery = "1=1";
 $summaryMessage = "";
@@ -89,6 +90,7 @@ $entries = $conn->query("SELECT * FROM burned_calories_log WHERE user_id = $user
 <html lang="en">
 <head>
     <title>Burned Calories Tracker</title>
+    <link rel="stylesheet" href="../Front End/FitifyRules.css">
 </head>
 <body>
 <div class="container">
@@ -156,11 +158,11 @@ $entries = $conn->query("SELECT * FROM burned_calories_log WHERE user_id = $user
         </tbody>
     </table>
 
-    <!--Burned calories chart-->
+    <!-- Burned Calories Chart -->
     <h2 class="section-heading">Calories Burned Over Time</h2>
-    <iframe src="burned_calories_chart.php?filter=<?= urlencode($filter) ?>" width="600" height="300" style="border:none; display:block; margin:auto;"></iframe>
+    <iframe src="../Front End/Charts/burned_calories_chart.php?filter=<?= urlencode($filter) ?>" width="100%" height="360" style="border:none; display:block; margin:auto;"></iframe>
 </div>
 
-<?php include 'footer.php'; ?>
+<?php include_once dirname(__DIR__) . '/Front End/footer.php'; ?>
 </body>
 </html>
