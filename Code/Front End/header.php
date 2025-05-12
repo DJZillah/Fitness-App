@@ -19,6 +19,7 @@ if (session_status() === PHP_SESSION_NONE) {
          <a href="../Back End/CalorieCounter.php">Nutrition</a>
          <a href="../Back End/WorkoutTracker.php">Workouts</a>
          <a href="../Back End/log_weight.php">Log Weight</a>
+         <a href="../Back End/burned_calories.php">Burned Calories</a> 
          <a href="../Front End/Add_milestone.php">Milestones</a>
         <a href="../Front End/calendar.php">Calendar</a>
         <a href="../Back End/setCalorieGoal.php">Set Calorie Goal</a>
